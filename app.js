@@ -1,6 +1,6 @@
 // KNOX SHOP - Main JS
 const SUPABASE_URL = 'https://lsievokkismxxaiezdlm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_xsZ1uV3jptCHuL_OieAKIg_0J9ADngi';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzaWV2b2traXNteHhhaWV6ZGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjY0NzgsImV4cCI6MjA5NzAwMjQ3OH0.TZ6_NlpDIrl6xDucsc8S4hqA23RQVWsVLrQRjtr6YmQ';
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'nguyenmm2803';
 
