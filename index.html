@@ -43,8 +43,12 @@
 <!-- USER BAR -->
 <div id="userBar" class="user-bar hidden">
     <div class="user-bar-content">
-        <span><i class="fas fa-user-circle"></i> Xin chào, <strong id="displayUsername"></strong></span>
+        <div class="user-info">
+            <span><i class="fas fa-user-circle"></i> Xin chào, <strong id="displayUsername"></strong></span>
+            <span class="balance-info"><i class="fas fa-wallet"></i> Số dư: <strong id="userBalance">0đ</strong></span>
+        </div>
         <div class="user-bar-actions">
+            <button onclick="openModal('depositModal')" class="btn-sm btn-deposit"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
             <button onclick="openModal('orderModal')" class="btn-sm"><i class="fas fa-shopping-cart"></i> Đặt đơn</button>
             <button onclick="openModal('historyModal')" class="btn-sm"><i class="fas fa-history"></i> Lịch sử</button>
             <button onclick="logout()" class="btn-sm btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
@@ -264,6 +268,7 @@
         <div class="section-header">
             <span class="section-badge">💳 THANH TOÁN</span>
             <h2 class="section-title">Phương thức thanh toán</h2>
+            <p class="section-desc">Nạp tiền vào tài khoản để mua hàng nhanh chóng</p>
         </div>
         <div class="payment-grid">
             <div class="payment-card">
@@ -272,7 +277,7 @@
                 <div class="payment-info">
                     <div class="info-row"><span>STK:</span><strong>1064291846</strong><button class="btn-copy" onclick="copyText('1064291846')"><i class="fas fa-copy"></i></button></div>
                     <div class="info-row"><span>Chủ TK:</span><strong>NGUYEN TRUNG NGUYEN</strong></div>
-                    <div class="info-row"><span>Nội dung:</span><strong>KNOX + Tên ĐN</strong></div>
+                    <div class="info-row"><span>Nội dung:</span><strong>Mã yêu cầu nạp</strong></div>
                 </div>
                 <div class="qr-code"><img src="https://img.vietqr.io/image/VCB-1064291846-compact.png" alt="QR VCB" loading="lazy"></div>
             </div>
@@ -395,7 +400,7 @@
         <div class="modal-body">
             <div class="form-group">
                 <label>Dịch vụ</label>
-                <select id="orderService">
+                <select id="orderService" onchange="updateOrderPrice()">
                     <optgroup label="🎮 Mod Game">
                         <option value="Mod Skill - 10.000đ">Mod Skill - 10.000đ</option>
                         <option value="Mod Cá - 20.000đ">Mod Cá - 20.000đ</option>
@@ -414,19 +419,59 @@
                     </optgroup>
                 </select>
             </div>
+            <div id="orderPriceDisplay" class="price-display"></div>
+            <div class="form-group">
+                <label>Ghi chú (ID game, yêu cầu...)</label>
+                <textarea id="orderNote" placeholder="VD: ID game, yêu cầu đặc biệt..."></textarea>
+            </div>
+            <div class="balance-notice">
+                <i class="fas fa-info-circle"></i> Tiền sẽ tự động trừ từ số dư của bạn
+            </div>
+            <button class="btn-primary full" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Xác nhận đặt đơn</button>
+        </div>
+    </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-wallet"></i> Nạp tiền vào tài khoản</h2>
+            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Số tiền muốn nạp (VNĐ)</label>
+                <input type="number" id="depositAmount" placeholder="VD: 50000" min="10000" max="10000000">
+                <div class="quick-amounts">
+                    <button type="button" onclick="document.getElementById('depositAmount').value=10000">10K</button>
+                    <button type="button" onclick="document.getElementById('depositAmount').value=20000">20K</button>
+                    <button type="button" onclick="document.getElementById('depositAmount').value=50000">50K</button>
+                    <button type="button" onclick="document.getElementById('depositAmount').value=100000">100K</button>
+                    <button type="button" onclick="document.getElementById('depositAmount').value=200000">200K</button>
+                    <button type="button" onclick="document.getElementById('depositAmount').value=500000">500K</button>
+                </div>
+            </div>
             <div class="form-group">
                 <label>Phương thức thanh toán</label>
-                <select id="orderPayment">
+                <select id="depositMethod">
                     <option value="VCB">Ngân hàng VCB</option>
                     <option value="Thẻ cào">Thẻ cào</option>
                     <option value="GCoin">GCoin</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Ghi chú</label>
-                <textarea id="orderNote" placeholder="VD: ID game, yêu cầu đặc biệt..."></textarea>
+                <label>Ghi chú (tuỳ chọn)</label>
+                <textarea id="depositNote" placeholder="VD: Số thẻ cào, ghi chú..."></textarea>
             </div>
-            <button class="btn-primary full" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Gửi đơn</button>
+            <div class="deposit-info">
+                <h4><i class="fas fa-university"></i> Thông tin chuyển khoản:</h4>
+                <p><strong>Ngân hàng:</strong> Vietcombank</p>
+                <p><strong>STK:</strong> 1064291846 <button class="btn-copy-mini" onclick="copyText('1064291846')"><i class="fas fa-copy"></i></button></p>
+                <p><strong>Chủ TK:</strong> NGUYEN TRUNG NGUYEN</p>
+                <p class="note">⚠️ Sau khi gửi yêu cầu, vui lòng chuyển khoản với nội dung là MÃ YÊU CẦU</p>
+            </div>
+            <button class="btn-primary full" onclick="requestDeposit()"><i class="fas fa-paper-plane"></i> Gửi yêu cầu nạp</button>
         </div>
     </div>
 </div>
@@ -435,7 +480,7 @@
 <div id="historyModal" class="modal">
     <div class="modal-content modal-lg">
         <div class="modal-header">
-            <h2><i class="fas fa-history"></i> Lịch sử đơn hàng</h2>
+            <h2><i class="fas fa-history"></i> Lịch sử giao dịch</h2>
             <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -450,4 +495,4 @@
 
 <script src="app.js"></script>
 </body>
-  </html>
+                                                     </html>
