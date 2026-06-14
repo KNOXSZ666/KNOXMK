@@ -298,30 +298,36 @@ async function delScript(id) {
     const { error } = await sb.from('scripts').delete().eq('id', id);
     if (error) toast('Lỗi', 'error');
     else { toast('Đã xóa', 'success'); render(); }
-}
-
-async function approveDeposit(code, username, amount) {
+} async function approveDeposit(code, username, amount) {
     if (!confirm(`Duyệt nạp ${fm(amount)} cho ${username}?`)) return;
     try {
-        const { data: user, error: getErr } = await sb.from('users').select('balance').eq('username', username).maybeSingle();
-        if (getErr) return toast('Lỗi lấy user: ' + getErr.message, 'error');
+        const { data: user } = await sb.from('users').select('balance, total_deposited').eq('username', username).maybeSingle();
         if (!user) return toast('Không tìm thấy user!', 'error');
         
         const newBalance = (user.balance || 0) + amount;
-        const { error: e1 } = await sb.from('users').update({ balance: newBalance }).eq('username', username);
-        if (e1) return toast('Lỗi cộng tiền: ' + e1.message, 'error');
+        const newTotal = (user.total_deposited || 0) + amount;
         
-        const { error: e2 } = await sb.from('deposits').update({ status: 'completed' }).eq('deposit_code', code);
-        if (e2) return toast('Lỗi update: ' + e2.message, 'error');
+        await sb.from('users').update({ 
+            balance: newBalance, 
+            total_deposited: newTotal 
+        }).eq('username', username);
         
-        toast(`✅ Đã cộng ${fm(amount)} cho ${username}. Số dư mới: ${fm(newBalance)}`, 'success');
+        await sb.from('deposits').update({ status: 'completed' }).eq('deposit_code', code);
+        
+        // Tạo thông báo cho user
+        await sb.from('notifications').insert([{
+            username: username,
+            title: '💰 Nạp tiền thành công',
+            message: `Đã cộng ${fm(amount)} vào tài khoản. Số dư mới: ${fm(newBalance)}`,
+            type: 'success'
+        }]);
+        
+        toast(`✅ Đã cộng ${fm(amount)} cho ${username}!`, 'success');
         await render();
     } catch (e) {
         toast('Lỗi: ' + e.message, 'error');
-        console.error(e);
     }
 }
-
 async function rejectDeposit(code) {
     if (!confirm('Từ chối yêu cầu này?')) return;
     const { error } = await sb.from('deposits').update({ status: 'cancelled' }).eq('deposit_code', code);
@@ -346,7 +352,7 @@ async function editBalance(username, currentBalance) {
         `• "=" trước số = ĐẶT số dư mới (VD: =1000000)`,
         ''
     );
-    
+
     if (action === null || action === '') return;
     
     let newBalance;
