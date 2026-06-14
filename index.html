@@ -1,1 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KNOX - Mod Game & Script Shop</title>
+<meta name="description" content="KNOX Shop - Mod Game Câu Cá Vạn Cân, Script Roblox uy tín #1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
 
+<!-- NAVBAR -->
+<nav id="navbar">
+    <div class="nav-container">
+        <div class="nav-logo" onclick="scrollToSection('home')">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">KNOX</span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a onclick="scrollToSection('home')">Trang chủ</a>
+            <a onclick="scrollToSection('services')">Dịch vụ</a>
+            <a onclick="scrollToSection('mod-game')">Mod Game</a>
+            <a onclick="scrollToSection('scripts')">Script</a>
+            <a onclick="scrollToSection('products')">Sản phẩm</a>
+            <a onclick="scrollToSection('payment')">Thanh toán</a>
+            <a onclick="scrollToSection('contact')">Liên hệ</a>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-login" id="btnLogin" onclick="openModal('loginModal')">
+                <i class="fas fa-user"></i> Đăng nhập
+            </button>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- USER BAR -->
+<div id="userBar" class="user-bar hidden">
+    <div class="user-bar-content">
+        <span><i class="fas fa-user-circle"></i> Xin chào, <strong id="displayUsername"></strong></span>
+        <div class="user-bar-actions">
+            <button onclick="openModal('orderModal')" class="btn-sm"><i class="fas fa-shopping-cart"></i> Đặt đơn</button>
+            <button onclick="openModal('historyModal')" class="btn-sm"><i class="fas fa-history"></i> Lịch sử</button>
+            <button onclick="logout()" class="btn-sm btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </div>
+    </div>
+</div>
+
+<!-- HERO -->
+<section id="home" class="hero">
+    <div class="hero-particles" id="particles"></div>
+    <div class="hero-content">
+        <div class="hero-badge">⚡ #1 Mod Game & Script Shop</div>
+        <h1 class="hero-title">
+            <span class="title-line">CHÀO MỪNG ĐẾN</span>
+            <span class="title-highlight">KNOX SHOP</span>
+        </h1>
+        <p class="hero-desc">Mod Game Câu Cá Vạn Cân | Script Roblox | Dịch vụ Gaming chất lượng cao</p>
+        <div class="hero-buttons">
+            <button class="btn-primary glow" onclick="scrollToSection('services')">
+                <i class="fas fa-rocket"></i> Khám phá ngay
+            </button>
+            <button class="btn-outline" onclick="scrollToSection('contact')">
+                <i class="fas fa-headset"></i> Liên hệ
+            </button>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number" data-count="500">0</span>+
+                <span class="stat-label">Khách hàng</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="1200">0</span>+
+                <span class="stat-label">Đơn hoàn thành</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="99">0</span>%
+                <span class="stat-label">Hài lòng</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">DỊCH VỤ</span>
+            <h2 class="section-title">Chúng tôi cung cấp gì?</h2>
+            <p class="section-desc">3 mảng dịch vụ chính – Uy tín & nhanh chóng</p>
+        </div>
+        <div class="services-grid gravity-container">
+            <div class="service-card gravity-item" style="--delay: 0">
+                <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+                <h3>Mod Game</h3>
+                <p>Mod Câu Cá Vạn Cân: Skill, Cá, Level, Item, Pet, Kim Cương</p>
+                <button class="btn-card" onclick="scrollToSection('mod-game')">Xem chi tiết →</button>
+            </div>
+            <div class="service-card gravity-item" style="--delay: 1">
+                <div class="card-icon"><i class="fas fa-code"></i></div>
+                <h3>Script Roblox</h3>
+                <p>Script chất lượng cho các game Roblox phổ biến</p>
+                <button class="btn-card" onclick="scrollToSection('scripts')">Xem chi tiết →</button>
+            </div>
+            <div class="service-card gravity-item" style="--delay: 2">
+                <div class="card-icon"><i class="fas fa-box-open"></i></div>
+                <h3>Sản phẩm khác</h3>
+                <p>Bản mod tự mod, câu chung theo giờ và nhiều hơn nữa</p>
+                <button class="btn-card" onclick="scrollToSection('products')">Xem chi tiết →</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MOD GAME -->
+<section id="mod-game" class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">🎮 MOD GAME</span>
+            <h2 class="section-title">Câu Cá Vạn Cân</h2>
+            <p class="section-desc">Chọn gói mod phù hợp – Giá rẻ, uy tín</p>
+        </div>
+        <div class="mod-grid gravity-container">
+            <div class="mod-card gravity-item" style="--delay: 0">
+                <div class="mod-card-header"><div class="mod-icon">🎯</div><span class="mod-tag">HOT</span></div>
+                <h3>Mod Skill</h3>
+                <div class="mod-price">10.000<span>đ</span></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Mở khóa tất cả skill</li>
+                    <li><i class="fas fa-check"></i> Max level skill</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Skill - 10.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item" style="--delay: 1">
+                <div class="mod-card-header"><div class="mod-icon">🐟</div><span class="mod-tag popular">POPULAR</span></div>
+                <h3>Mod Cá</h3>
+                <div class="mod-price">20.000<span>đ</span></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Mở khóa tất cả cá</li>
+                    <li><i class="fas fa-check"></i> Cá hiếm & cá VIP</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Cá - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item" style="--delay: 2">
+                <div class="mod-card-header"><div class="mod-icon">📈</div></div>
+                <h3>Mod Level</h3>
+                <div class="mod-price">10.000<span>đ</span></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Lên level theo yêu cầu</li>
+                    <li><i class="fas fa-check"></i> Nhanh chóng</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Level - 10.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item" style="--delay: 3">
+                <div class="mod-card-header"><div class="mod-icon">🎒</div></div>
+                <h3>Mod Item</h3>
+                <div class="mod-price">20.000<span>đ</span></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Mở khóa tất cả item</li>
+                    <li><i class="fas fa-check"></i> Item VIP</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Item - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item" style="--delay: 4">
+                <div class="mod-card-header"><div class="mod-icon">🐾</div></div>
+                <h3>Mod Pet</h3>
+                <div class="mod-price">20.000<span>đ</span></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Mở khóa tất cả pet</li>
+                    <li><i class="fas fa-check"></i> Pet hiếm</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Pet - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item" style="--delay: 5">
+                <div class="mod-card-header"><div class="mod-icon">💎</div><span class="mod-tag vip">VIP</span></div>
+                <h3>Mod Kim Cương</h3>
+                <div class="mod-price">30.000<span>đ</span><small>/1tr KC</small></div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> 1 triệu Kim Cương</li>
+                    <li><i class="fas fa-check"></i> Giao nhanh</li>
+                    <li><i class="fas fa-check"></i> Bảo hành</li>
+                </ul>
+                <button class="btn-order" onclick="orderItem('Mod Kim Cương - 30.000đ/1tr KC')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="mod-card gravity-item full-pack" style="--delay: 6">
+                <div class="mod-card-header"><div class="mod-icon">🏆</div><span class="mod-tag vip">FULL PACK</span></div>
+                <h3>Câu Cá Vạn Cân Full</h3>
+                <div class="mod-price contact">Liên hệ</div>
+                <ul class="mod-features">
+                    <li><i class="fas fa-check"></i> Tất cả gói mod</li>
+                    <li><i class="fas fa-check"></i> Giá ưu đãi combo</li>
+                    <li><i class="fas fa-check"></i> Bảo hành trọn đời</li>
+                </ul>
+                <button class="btn-order contact-btn" onclick="scrollToSection('contact')"><i class="fas fa-headset"></i> Liên hệ ngay</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SCRIPT -->
+<section id="scripts" class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">💻 SCRIPT ROBLOX</span>
+            <h2 class="section-title">Script Game Roblox</h2>
+            <p class="section-desc">Script chất lượng, cập nhật thường xuyên</p>
+        </div>
+        <div class="script-grid gravity-container" id="scriptGrid">
+            <div class="script-card gravity-item visible" style="--delay: 0">
+                <div class="script-card-header"><div class="script-icon">🎯</div><span class="script-game">Roblox</span></div>
+                <h3>Sniper Arena</h3>
+                <p class="script-desc">Script hỗ trợ chơi game Sniper Arena trên Roblox.</p>
+                <div class="script-price">15.000<span>đ</span></div>
+                <div class="script-features">
+                    <span><i class="fas fa-check-circle"></i> Auto aim</span>
+                    <span><i class="fas fa-check-circle"></i> ESP</span>
+                </div>
+                <button class="btn-order" onclick="orderItem('Script Sniper Arena - 15.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">📦 SẢN PHẨM KHÁC</span>
+            <h2 class="section-title">Sản phẩm & Dịch vụ thêm</h2>
+        </div>
+        <div class="product-grid gravity-container">
+            <div class="product-card gravity-item" style="--delay: 0">
+                <div class="product-icon">📱</div>
+                <h3>Bản Mod (Tự Mod)</h3>
+                <p>Nhận bản mod game đã được mod sẵn, tự cài đặt</p>
+                <div class="product-price">85.000<span>đ</span></div>
+                <button class="btn-order" onclick="orderItem('Bản Mod Tự Mod - 85.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+            <div class="product-card gravity-item" style="--delay: 1">
+                <div class="product-icon">🎣</div>
+                <h3>Câu Chung (Theo Giờ)</h3>
+                <p>Thuê người câu chung, hỗ trợ farm theo giờ</p>
+                <div class="product-price">20.000<span>đ</span><small>/giờ</small></div>
+                <button class="btn-order" onclick="orderItem('Câu Chung Theo Giờ - 20.000đ/giờ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PAYMENT -->
+<section id="payment" class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">💳 THANH TOÁN</span>
+            <h2 class="section-title">Phương thức thanh toán</h2>
+        </div>
+        <div class="payment-grid">
+            <div class="payment-card">
+                <div class="payment-icon"><i class="fas fa-university"></i></div>
+                <h3>Vietcombank</h3>
+                <div class="payment-info">
+                    <div class="info-row"><span>STK:</span><strong>1064291846</strong><button class="btn-copy" onclick="copyText('1064291846')"><i class="fas fa-copy"></i></button></div>
+                    <div class="info-row"><span>Chủ TK:</span><strong>NGUYEN TRUNG NGUYEN</strong></div>
+                    <div class="info-row"><span>Nội dung:</span><strong>KNOX + Tên ĐN</strong></div>
+                </div>
+                <div class="qr-code"><img src="https://img.vietqr.io/image/VCB-1064291846-compact.png" alt="QR VCB" loading="lazy"></div>
+            </div>
+            <div class="payment-card">
+                <div class="payment-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Thẻ Cào</h3>
+                <div class="payment-info">
+                    <p>Hỗ trợ nạp qua thẻ cào</p>
+                    <p class="payment-note">⚠️ Chiết khấu 20-30%</p>
+                    <p>Liên hệ Zalo để gửi thẻ</p>
+                </div>
+            </div>
+            <div class="payment-card">
+                <div class="payment-icon"><i class="fas fa-coins"></i></div>
+                <h3>GCoin</h3>
+                <div class="payment-info">
+                    <p>Thanh toán qua GCoin</p>
+                    <p>Liên hệ để biết tỷ giá</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">📞 LIÊN HỆ</span>
+            <h2 class="section-title">Liên hệ với chúng tôi</h2>
+            <p class="section-desc">Hoạt động từ 8:00 - 23:00 hàng ngày</p>
+        </div>
+        <div class="contact-grid">
+            <a href="https://zalo.me/0564721862" target="_blank" class="contact-card">
+                <div class="contact-icon zalo"><i class="fas fa-comment-dots"></i></div>
+                <h3>Zalo</h3>
+                <p>0564 721 862</p>
+            </a>
+            <a href="https://t.me/ngonthe666" target="_blank" class="contact-card">
+                <div class="contact-icon telegram"><i class="fab fa-telegram-plane"></i></div>
+                <h3>Telegram</h3>
+                <p>@ngonthe666</p>
+            </a>
+            <a href="mailto:n799903@gmail.com" class="contact-card">
+                <div class="contact-icon email"><i class="fas fa-envelope"></i></div>
+                <h3>Email</h3>
+                <p>n799903@gmail.com</p>
+            </a>
+        </div>
+        <div class="working-hours">
+            <i class="fas fa-clock"></i>
+            <span>Giờ hoạt động: <strong>8:00 - 23:00</strong> hàng ngày</span>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-logo"><span class="logo-icon">⚡</span><span class="logo-text">KNOX</span></div>
+            <p>© 2024 KNOX Shop. Mod Game & Script uy tín #1</p>
+            <div class="footer-links">
+                <a href="https://zalo.me/0564721862" target="_blank"><i class="fas fa-comment-dots"></i></a>
+                <a href="https://t.me/ngonthe666" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+                <a href="mailto:n799903@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-sign-in-alt"></i> Đăng nhập</h2>
+            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập">
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
+            </div>
+            <button class="btn-primary full" onclick="login()"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
+            <p class="form-switch">Chưa có tài khoản? <a onclick="switchModal('loginModal','registerModal')">Đăng ký</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-plus"></i> Đăng ký</h2>
+            <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group"><label>Tên đăng nhập</label><input type="text" id="regUsername" placeholder="Tên đăng nhập"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="Email"></div>
+            <div class="form-group"><label>Số Zalo</label><input type="text" id="regZalo" placeholder="Số Zalo"></div>
+            <div class="form-group"><label>Mật khẩu</label><input type="password" id="regPassword" placeholder="Mật khẩu"></div>
+            <div class="form-group"><label>Xác nhận mật khẩu</label><input type="password" id="regPassword2" placeholder="Nhập lại mật khẩu"></div>
+            <button class="btn-primary full" onclick="register()"><i class="fas fa-user-plus"></i> Đăng ký</button>
+            <p class="form-switch">Đã có tài khoản? <a onclick="switchModal('registerModal','loginModal')">Đăng nhập</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-shopping-cart"></i> Đặt đơn</h2>
+            <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Dịch vụ</label>
+                <select id="orderService">
+                    <optgroup label="🎮 Mod Game">
+                        <option value="Mod Skill - 10.000đ">Mod Skill - 10.000đ</option>
+                        <option value="Mod Cá - 20.000đ">Mod Cá - 20.000đ</option>
+                        <option value="Mod Level - 10.000đ">Mod Level - 10.000đ</option>
+                        <option value="Mod Item - 20.000đ">Mod Item - 20.000đ</option>
+                        <option value="Mod Pet - 20.000đ">Mod Pet - 20.000đ</option>
+                        <option value="Mod Kim Cương - 30.000đ/1tr KC">Mod Kim Cương - 30.000đ/1tr KC</option>
+                        <option value="Câu Cá Vạn Cân Full - Liên hệ">Câu Cá Vạn Cân Full - Liên hệ</option>
+                    </optgroup>
+                    <optgroup label="💻 Script Roblox">
+                        <option value="Script Sniper Arena - 15.000đ">Script Sniper Arena - 15.000đ</option>
+                    </optgroup>
+                    <optgroup label="📦 Sản phẩm khác">
+                        <option value="Bản Mod Tự Mod - 85.000đ">Bản Mod Tự Mod - 85.000đ</option>
+                        <option value="Câu Chung Theo Giờ - 20.000đ/giờ">Câu Chung Theo Giờ - 20.000đ/giờ</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Phương thức thanh toán</label>
+                <select id="orderPayment">
+                    <option value="VCB">Ngân hàng VCB</option>
+                    <option value="Thẻ cào">Thẻ cào</option>
+                    <option value="GCoin">GCoin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ghi chú</label>
+                <textarea id="orderNote" placeholder="VD: ID game, yêu cầu đặc biệt..."></textarea>
+            </div>
+            <button class="btn-primary full" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Gửi đơn</button>
+        </div>
+    </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div id="historyModal" class="modal">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Lịch sử đơn hàng</h2>
+            <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="orderHistory" class="order-history">
+                <p class="empty-state"><i class="fas fa-inbox"></i> Đang tải...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+  </html>
