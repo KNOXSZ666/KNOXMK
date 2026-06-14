@@ -216,7 +216,7 @@ async function render() {
                                 <td><code style="color:#f59e0b">${u.password}</code></td>
                                 <td>${new Date(u.created_at).toLocaleString('vi-VN')}</td>
                                 <td>
-                                    <button class="action-btn" onclick="editBalance('${u.username}', ${u.balance || 0})" title="Sửa số dư"><i class="fas fa-coins"></i></button>
+                                    <button class="action-btn success" onclick="editBalance('${u.username}', ${u.balance || 0})" title="Quản lý số dư"><i class="fas fa-coins"></i> Tiền</button>
                                     <button class="action-btn danger" onclick="delUser(${u.id})"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>`).join('')}
@@ -303,7 +303,8 @@ async function delScript(id) {
 async function approveDeposit(code, username, amount) {
     if (!confirm(`Duyệt nạp ${fm(amount)} cho ${username}?`)) return;
     try {
-        const { data: user } = await sb.from('users').select('balance').eq('username', username).maybeSingle();
+        const { data: user, error: getErr } = await sb.from('users').select('balance').eq('username', username).maybeSingle();
+        if (getErr) return toast('Lỗi lấy user: ' + getErr.message, 'error');
         if (!user) return toast('Không tìm thấy user!', 'error');
         
         const newBalance = (user.balance || 0) + amount;
@@ -313,10 +314,11 @@ async function approveDeposit(code, username, amount) {
         const { error: e2 } = await sb.from('deposits').update({ status: 'completed' }).eq('deposit_code', code);
         if (e2) return toast('Lỗi update: ' + e2.message, 'error');
         
-        toast(`✅ Đã cộng ${fm(amount)} cho ${username}`, 'success');
-        render();
+        toast(`✅ Đã cộng ${fm(amount)} cho ${username}. Số dư mới: ${fm(newBalance)}`, 'success');
+        await render();
     } catch (e) {
         toast('Lỗi: ' + e.message, 'error');
+        console.error(e);
     }
 }
 
@@ -335,14 +337,64 @@ async function delDeposit(code) {
 }
 
 async function editBalance(username, currentBalance) {
-    const newBal = prompt(`Số dư hiện tại của ${username}: ${fm(currentBalance)}\n\nNhập số dư mới:`, currentBalance);
-    if (newBal === null) return;
-    const amount = parseInt(newBal);
-    if (isNaN(amount) || amount < 0) return toast('Số tiền không hợp lệ!', 'error');
+    const action = prompt(
+        `📝 Quản lý số dư: ${username}\n` +
+        `Số dư hiện tại: ${fm(currentBalance)}\n\n` +
+        `Nhập số tiền:\n` +
+        `• Số dương = CỘNG thêm (VD: 50000)\n` +
+        `• Số âm = TRỪ bớt (VD: -20000)\n` +
+        `• "=" trước số = ĐẶT số dư mới (VD: =1000000)`,
+        ''
+    );
     
-    const { error } = await sb.from('users').update({ balance: amount }).eq('username', username);
-    if (error) toast('Lỗi: ' + error.message, 'error');
-    else { toast(`✅ Đã cập nhật số dư cho ${username}`, 'success'); render(); }
+    if (action === null || action === '') return;
+    
+    let newBalance;
+    let actionType;
+    let amount;
+    
+    if (action.startsWith('=')) {
+        newBalance = parseInt(action.substring(1));
+        if (isNaN(newBalance) || newBalance < 0) return toast('Số không hợp lệ!', 'error');
+        amount = newBalance - currentBalance;
+        actionType = 'đặt thành';
+    } else {
+        amount = parseInt(action);
+        if (isNaN(amount)) return toast('Số không hợp lệ!', 'error');
+        newBalance = currentBalance + amount;
+        if (newBalance < 0) return toast('Số dư không thể âm!', 'error');
+        actionType = amount >= 0 ? 'cộng' : 'trừ';
+    }
+    
+    if (!confirm(
+        `Xác nhận:\n` +
+        `User: ${username}\n` +
+        `Số dư cũ: ${fm(currentBalance)}\n` +
+        `${actionType.toUpperCase()}: ${fm(Math.abs(amount))}\n` +
+        `Số dư mới: ${fm(newBalance)}\n\n` +
+        `Tiếp tục?`
+    )) return;
+    
+    try {
+        const { data, error } = await sb.from('users')
+            .update({ balance: newBalance })
+            .eq('username', username)
+            .select();
+        
+        if (error) {
+            toast('❌ Lỗi: ' + error.message, 'error');
+            console.error('Update error:', error);
+        } else if (!data || data.length === 0) {
+            toast('❌ Không update được! Kiểm tra RLS policy', 'error');
+        } else {
+            toast(`✅ Đã ${actionType} ${fm(Math.abs(amount))} cho ${username}! Số dư mới: ${fm(newBalance)}`, 'success');
+            console.log('Updated user:', data);
+            await render();
+        }
+    } catch (e) {
+        toast('❌ Lỗi exception: ' + e.message, 'error');
+        console.error(e);
+    }
 }
 
 function adminLogout() {
