@@ -4,14 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KNOX - Mod Game & Script Shop</title>
-<meta name="description" content="KNOX Shop - Mod Game Câu Cá Vạn Cân, Script Roblox uy tín #1">
+<meta name="theme-color" content="#8b5cf6">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+<!-- PWA Install Banner -->
+<div id="pwaBanner" class="pwa-banner hidden">
+    <span>📱 Cài KNOX như ứng dụng?</span>
+    <div>
+        <button onclick="installPWA()" class="pwa-btn">Cài đặt</button>
+        <button onclick="dismissPWA()" class="pwa-btn-close">×</button>
+    </div>
+</div>
 
 <!-- NAVBAR -->
 <nav id="navbar">
@@ -21,15 +32,15 @@
             <span class="logo-text">KNOX</span>
         </div>
         <div class="nav-links" id="navLinks">
-            <a onclick="scrollToSection('home')">Trang chủ</a>
-            <a onclick="scrollToSection('services')">Dịch vụ</a>
-            <a onclick="scrollToSection('mod-game')">Mod Game</a>
-            <a onclick="scrollToSection('scripts')">Script</a>
-            <a onclick="scrollToSection('products')">Sản phẩm</a>
-            <a onclick="scrollToSection('payment')">Thanh toán</a>
-            <a onclick="scrollToSection('contact')">Liên hệ</a>
+            <a onclick="scrollToSection('home')" data-i18n="nav.home">Trang chủ</a>
+            <a onclick="scrollToSection('hot-deals')" data-i18n="nav.hotdeals">🔥 Hot Deals</a>
+            <a onclick="scrollToSection('mod-game')" data-i18n="nav.modgame">Mod Game</a>
+            <a onclick="scrollToSection('scripts')" data-i18n="nav.scripts">Script</a>
+            <a onclick="scrollToSection('products')" data-i18n="nav.products">Sản phẩm</a>
+            <a onclick="scrollToSection('top-deposit')" data-i18n="nav.topnap">🏆 Top Nạp</a>
+            <a onclick="scrollToSection('payment')" data-i18n="nav.payment">Thanh toán</a>
+            <a onclick="scrollToSection('contact')" data-i18n="nav.contact">Liên hệ</a>
             
-            <!-- USER SECTION TRONG MENU -->
             <div id="navUserSection" class="nav-user-section hidden">
                 <div class="nav-user-info">
                     <div class="nav-user-avatar"><i class="fas fa-user-circle"></i></div>
@@ -40,71 +51,47 @@
                 </div>
                 <div class="nav-balance">
                     <i class="fas fa-wallet"></i>
-                    <span>Số dư:</span>
+                    <span data-i18n="user.balance">Số dư:</span>
                     <strong id="userBalance">0đ</strong>
                 </div>
                 <div class="nav-stats">
-                    <div class="nav-stat-item">
-                        <i class="fas fa-shopping-bag"></i>
-                        <span>Đã chi: <strong id="totalSpent">0đ</strong></span>
-                    </div>
-                    <div class="nav-stat-item">
-                        <i class="fas fa-coins"></i>
-                        <span>Đã nạp: <strong id="totalDeposited">0đ</strong></span>
-                    </div>
+                    <div class="nav-stat-item"><i class="fas fa-shopping-bag"></i><span><span data-i18n="user.totalspent">Đã chi</span>: <strong id="totalSpent">0đ</strong></span></div>
+                    <div class="nav-stat-item"><i class="fas fa-coins"></i><span><span data-i18n="user.totaldeposit">Đã nạp</span>: <strong id="totalDeposited">0đ</strong></span></div>
                 </div>
                 <div class="nav-user-actions">
-                    <button onclick="openModal('depositModal'); closeMobileMenu()" class="nav-btn nav-btn-deposit"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
-                    <button onclick="openModal('orderModal'); closeMobileMenu()" class="nav-btn"><i class="fas fa-shopping-cart"></i> Đặt đơn</button>
-                    <button onclick="openModal('historyModal'); closeMobileMenu()" class="nav-btn"><i class="fas fa-history"></i> Lịch sử</button>
-                    <button onclick="openModal('dashboardModal'); closeMobileMenu()" class="nav-btn"><i class="fas fa-chart-line"></i> Dashboard</button>
-                    <button onclick="openModal('notificationModal'); closeMobileMenu()" class="nav-btn">
-                        <i class="fas fa-bell"></i> Thông báo
-                        <span id="notifBadge" class="notif-badge hidden">0</span>
-                    </button>
-                    <button onclick="openModal('referralModal'); closeMobileMenu()" class="nav-btn"><i class="fas fa-user-friends"></i> Giới thiệu bạn</button>
-                    <button onclick="openModal('changePassModal'); closeMobileMenu()" class="nav-btn"><i class="fas fa-key"></i> Đổi mật khẩu</button>
-                    <button onclick="logout(); closeMobileMenu()" class="nav-btn nav-btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                    <button onclick="openModal('depositModal');closeMobileMenu()" class="nav-btn nav-btn-deposit"><i class="fas fa-plus-circle"></i> <span data-i18n="user.deposit">Nạp tiền</span></button>
+                    <button onclick="openModal('orderModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-shopping-cart"></i> <span data-i18n="user.order">Đặt đơn</span></button>
+                    <button onclick="openModal('historyModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-history"></i> <span data-i18n="user.history">Lịch sử</span></button>
+                    <button onclick="openModal('dashboardModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-chart-line"></i> <span data-i18n="user.dashboard">Dashboard</span></button>
+                    <button onclick="openModal('notificationModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-bell"></i> <span data-i18n="user.notifications">Thông báo</span><span id="notifBadge" class="notif-badge hidden">0</span></button>
+                    <button onclick="openModal('ticketModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-headset"></i> <span data-i18n="user.support">Hỗ trợ</span></button>
+                    <button onclick="openModal('referralModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-user-friends"></i> <span data-i18n="user.referral">Giới thiệu</span></button>
+                    <button onclick="openModal('changePassModal');closeMobileMenu()" class="nav-btn"><i class="fas fa-key"></i> <span data-i18n="user.changepass">Đổi mật khẩu</span></button>
+                    <button onclick="logout();closeMobileMenu()" class="nav-btn nav-btn-danger"><i class="fas fa-sign-out-alt"></i> <span data-i18n="user.logout">Đăng xuất</span></button>
                 </div>
             </div>
         </div>
         <div class="nav-actions">
-            <button class="btn-login" id="btnLogin" onclick="openModal('loginModal')">
-                <i class="fas fa-user"></i> Đăng nhập
-            </button>
-            <button class="btn-notif-mobile hidden" id="btnNotifMobile" onclick="openModal('notificationModal')">
-                <i class="fas fa-bell"></i>
-                <span id="notifBadgeMobile" class="notif-badge hidden">0</span>
-            </button>
-            <div class="hamburger" onclick="toggleMenu()">
-                <span></span><span></span><span></span>
-            </div>
+            <button id="langToggle" onclick="setLang(currentLang==='vi'?'en':'vi')" class="lang-btn">🇬🇧 EN</button>
+            <button class="btn-login" id="btnLogin" onclick="openModal('loginModal')"><i class="fas fa-user"></i> <span data-i18n="nav.login">Đăng nhập</span></button>
+            <button class="btn-notif-mobile hidden" id="btnNotifMobile" onclick="openModal('notificationModal')"><i class="fas fa-bell"></i><span id="notifBadgeMobile" class="notif-badge hidden">0</span></button>
+            <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
         </div>
     </div>
 </nav>
 
 <!-- CHAT WIDGET -->
 <div id="chatWidget" class="chat-widget hidden">
-    <div class="chat-bubble" onclick="toggleChat()">
-        <i class="fas fa-comments"></i>
-        <span class="chat-pulse"></span>
-    </div>
+    <div class="chat-bubble" onclick="toggleChat()"><i class="fas fa-comments"></i><span class="chat-pulse"></span></div>
     <div id="chatBox" class="chat-box hidden">
         <div class="chat-header">
-            <div>
-                <h4>💬 Hỗ trợ KNOX</h4>
-                <span class="online-dot"></span> <small>Online</small>
-            </div>
+            <div><h4>💬 KNOX Support</h4><span class="online-dot"></span> <small>Online</small></div>
             <button onclick="toggleChat()">&times;</button>
         </div>
         <div class="chat-body">
+            <div class="chat-msg admin"><b>KNOX</b><p>Xin chào! 👋 Cần hỗ trợ gì?</p></div>
             <div class="chat-msg admin">
-                <b>KNOX Support</b>
-                <p>Xin chào! Bạn cần hỗ trợ gì? 👋</p>
-            </div>
-            <div class="chat-msg admin">
-                <b>KNOX Support</b>
-                <p>Liên hệ nhanh:</p>
+                <b>KNOX</b><p>Liên hệ nhanh:</p>
                 <div class="chat-quick">
                     <a href="https://zalo.me/0564721862" target="_blank" class="chat-btn zalo"><i class="fas fa-comment-dots"></i> Zalo</a>
                     <a href="https://t.me/ngonthe666" target="_blank" class="chat-btn telegram"><i class="fab fa-telegram-plane"></i> Telegram</a>
@@ -118,243 +105,98 @@
 <section id="home" class="hero">
     <div class="hero-particles" id="particles"></div>
     <div class="hero-content">
-        <div class="hero-badge">⚡ #1 Mod Game & Script Shop</div>
+        <div class="hero-badge" data-i18n="hero.badge">⚡ #1 Mod Game & Script Shop</div>
         <h1 class="hero-title">
-            <span class="title-line">CHÀO MỪNG ĐẾN</span>
+            <span class="title-line" data-i18n="hero.welcome">CHÀO MỪNG ĐẾN</span>
             <span class="title-highlight">KNOX SHOP</span>
         </h1>
-        <p class="hero-desc">Mod Game Câu Cá Vạn Cân | Script Roblox | Hệ thống VIP & Mã giảm giá</p>
+        <p class="hero-desc" data-i18n="hero.desc">Mod Game Câu Cá Vạn Cân | Script Roblox | Hệ thống VIP</p>
         <div class="hero-buttons">
-            <button class="btn-primary glow" onclick="scrollToSection('services')">
-                <i class="fas fa-rocket"></i> Khám phá ngay
-            </button>
-            <button class="btn-outline" onclick="scrollToSection('contact')">
-                <i class="fas fa-headset"></i> Liên hệ
-            </button>
+            <button class="btn-primary glow" onclick="scrollToSection('mod-game')"><i class="fas fa-rocket"></i> <span data-i18n="hero.explore">Khám phá ngay</span></button>
+            <button class="btn-outline" onclick="scrollToSection('contact')"><i class="fas fa-headset"></i> <span data-i18n="hero.contact">Liên hệ</span></button>
         </div>
         <div class="hero-stats">
-            <div class="stat-item"><span class="stat-number" data-count="500">0</span>+<span class="stat-label">Khách hàng</span></div>
-            <div class="stat-item"><span class="stat-number" data-count="1200">0</span>+<span class="stat-label">Đơn hoàn thành</span></div>
-            <div class="stat-item"><span class="stat-number" data-count="99">0</span>%<span class="stat-label">Hài lòng</span></div>
+            <div class="stat-item"><span class="stat-number" data-count="500">0</span>+<span class="stat-label" data-i18n="hero.customers">Khách hàng</span></div>
+            <div class="stat-item"><span class="stat-number" data-count="1200">0</span>+<span class="stat-label" data-i18n="hero.orders">Đơn hoàn thành</span></div>
+            <div class="stat-item"><span class="stat-number" data-count="99">0</span>%<span class="stat-label" data-i18n="hero.satisfaction">Hài lòng</span></div>
         </div>
     </div>
 </section>
 
-<!-- VIP TIERS -->
-<section id="vip" class="section section-dark">
+<!-- HOT DEALS -->
+<section id="hot-deals" class="section">
     <div class="container">
         <div class="section-header">
-            <span class="section-badge">🏆 HẠNG VIP</span>
-            <h2 class="section-title">Hệ thống VIP</h2>
-            <p class="section-desc">Nạp càng nhiều - Ưu đãi càng cao</p>
+            <span class="section-badge">🔥 HOT DEALS</span>
+            <h2 class="section-title">Khuyến mãi hot</h2>
+            <p class="section-desc">Sản phẩm đang giảm giá sốc!</p>
         </div>
-        <div class="vip-grid">
-            <div class="vip-card vip-0">
-                <div class="vip-icon">🆕</div>
-                <h3>NEW</h3>
-                <div class="vip-condition">Nạp < 100K</div>
-                <ul><li>Giá thường</li><li>Hỗ trợ cơ bản</li></ul>
-            </div>
-            <div class="vip-card vip-1">
-                <div class="vip-icon">🥉</div>
-                <h3>VIP 1</h3>
-                <div class="vip-condition">Nạp 100K+</div>
-                <ul><li>Giảm 5%</li><li>Hỗ trợ nhanh</li><li>Mã KNOX10</li></ul>
-            </div>
-            <div class="vip-card vip-2">
-                <div class="vip-icon">🥈</div>
-                <h3>VIP 2</h3>
-                <div class="vip-condition">Nạp 500K+</div>
-                <ul><li>Giảm 10%</li><li>Hỗ trợ 24/7</li><li>Mã KNOX20</li></ul>
-            </div>
-            <div class="vip-card vip-3">
-                <div class="vip-icon">🥇</div>
-                <h3>VIP 3</h3>
-                <div class="vip-condition">Nạp 1M+</div>
-                <ul><li>Giảm 15%</li><li>Hỗ trợ riêng</li><li>Tặng thẻ tháng</li></ul>
-            </div>
-            <div class="vip-card vip-4">
-                <div class="vip-icon">💎</div>
-                <h3>VIP 4</h3>
-                <div class="vip-condition">Nạp 5M+</div>
-                <ul><li>Giảm 20%</li><li>Quà sinh nhật</li><li>Voucher 100K</li></ul>
-            </div>
+        <div id="hotDealsGrid" class="hot-deals-grid">
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
         </div>
     </div>
 </section>
 
-<!-- SERVICES -->
-<section id="services" class="section">
+<!-- TOP NẠP -->
+<section id="top-deposit" class="section section-dark">
     <div class="container">
         <div class="section-header">
-            <span class="section-badge">DỊCH VỤ</span>
-            <h2 class="section-title">Chúng tôi cung cấp gì?</h2>
+            <span class="section-badge">🏆 BẢNG XẾP HẠNG</span>
+            <h2 class="section-title">Top Nạp Tháng Này</h2>
+            <p class="section-desc">Khách hàng nạp nhiều nhất tháng</p>
         </div>
-        <div class="services-grid gravity-container">
-            <div class="service-card gravity-item" style="--delay: 0">
-                <div class="card-icon"><i class="fas fa-gamepad"></i></div>
-                <h3>Mod Game</h3>
-                <p>Mod Câu Cá Vạn Cân đầy đủ</p>
-                <button class="btn-card" onclick="scrollToSection('mod-game')">Xem chi tiết →</button>
-            </div>
-            <div class="service-card gravity-item" style="--delay: 1">
-                <div class="card-icon"><i class="fas fa-code"></i></div>
-                <h3>Script Roblox</h3>
-                <p>Script chất lượng cho Roblox</p>
-                <button class="btn-card" onclick="scrollToSection('scripts')">Xem chi tiết →</button>
-            </div>
-            <div class="service-card gravity-item" style="--delay: 2">
-                <div class="card-icon"><i class="fas fa-box-open"></i></div>
-                <h3>Sản phẩm khác</h3>
-                <p>Bản mod, câu chung theo giờ</p>
-                <button class="btn-card" onclick="scrollToSection('products')">Xem chi tiết →</button>
-            </div>
+        <div id="topDepositList" class="top-deposit-list">
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
+            <div class="skeleton skeleton-row"></div>
         </div>
     </div>
 </section>
 
 <!-- MOD GAME -->
-<section id="mod-game" class="section section-dark">
+<section id="mod-game" class="section">
     <div class="container">
         <div class="section-header">
             <span class="section-badge">🎮 MOD GAME</span>
             <h2 class="section-title">Câu Cá Vạn Cân</h2>
         </div>
         <div class="mod-grid gravity-container">
-            <div class="mod-card gravity-item" style="--delay: 0">
-                <div class="mod-card-header"><div class="mod-icon">🎯</div><span class="mod-tag">HOT</span></div>
-                <h3>Mod Skill</h3>
-                <div class="mod-price">10.000<span>đ</span></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Mở khóa tất cả skill</li>
-                    <li><i class="fas fa-check"></i> Max level skill</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Skill - 10.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Skill')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item" style="--delay: 1">
-                <div class="mod-card-header"><div class="mod-icon">🐟</div><span class="mod-tag popular">POPULAR</span></div>
-                <h3>Mod Cá</h3>
-                <div class="mod-price">20.000<span>đ</span></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Mở khóa tất cả cá</li>
-                    <li><i class="fas fa-check"></i> Cá hiếm & VIP</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Cá - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Cá')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item" style="--delay: 2">
-                <div class="mod-card-header"><div class="mod-icon">📈</div></div>
-                <h3>Mod Level</h3>
-                <div class="mod-price">10.000<span>đ</span></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Lên level theo yêu cầu</li>
-                    <li><i class="fas fa-check"></i> Nhanh chóng</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Level - 10.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Level')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item" style="--delay: 3">
-                <div class="mod-card-header"><div class="mod-icon">🎒</div></div>
-                <h3>Mod Item</h3>
-                <div class="mod-price">20.000<span>đ</span></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Mở khóa tất cả item</li>
-                    <li><i class="fas fa-check"></i> Item VIP</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Item - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Item')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item" style="--delay: 4">
-                <div class="mod-card-header"><div class="mod-icon">🐾</div></div>
-                <h3>Mod Pet</h3>
-                <div class="mod-price">20.000<span>đ</span></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Mở khóa tất cả pet</li>
-                    <li><i class="fas fa-check"></i> Pet hiếm</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Pet - 20.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Pet')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item" style="--delay: 5">
-                <div class="mod-card-header"><div class="mod-icon">💎</div><span class="mod-tag vip">VIP</span></div>
-                <h3>Mod Kim Cương</h3>
-                <div class="mod-price">30.000<span>đ</span><small>/1tr KC</small></div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> 1 triệu Kim Cương</li>
-                    <li><i class="fas fa-check"></i> Giao nhanh</li>
-                </ul>
-                <button class="btn-order" onclick="orderItem('Mod Kim Cương - 30.000đ/1tr KC')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-                <button class="btn-review" onclick="openReview('Mod Kim Cương')"><i class="fas fa-star"></i> Đánh giá</button>
-            </div>
-            <div class="mod-card gravity-item full-pack" style="--delay: 6">
-                <div class="mod-card-header"><div class="mod-icon">🏆</div><span class="mod-tag vip">FULL PACK</span></div>
-                <h3>Câu Cá Vạn Cân Full</h3>
-                <div class="mod-price contact">Liên hệ</div>
-                <ul class="mod-features">
-                    <li><i class="fas fa-check"></i> Tất cả gói mod</li>
-                    <li><i class="fas fa-check"></i> Giá ưu đãi combo</li>
-                </ul>
-                <button class="btn-order contact-btn" onclick="scrollToSection('contact')"><i class="fas fa-headset"></i> Liên hệ ngay</button>
-            </div>
+            <div class="mod-card gravity-item" style="--delay:0"><div class="mod-card-header"><div class="mod-icon">🎯</div><span class="mod-tag">HOT</span></div><h3>Mod Skill</h3><div class="mod-price">10.000<span>đ</span></div><ul class="mod-features"><li><i class="fas fa-check"></i> Mở khóa tất cả skill</li><li><i class="fas fa-check"></i> Bảo hành</li></ul><button class="btn-order" onclick="orderItem('Mod Skill - 10.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Skill')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item" style="--delay:1"><div class="mod-card-header"><div class="mod-icon">🐟</div><span class="mod-tag popular">POPULAR</span></div><h3>Mod Cá</h3><div class="mod-price">20.000<span>đ</span></div><ul class="mod-features"><li><i class="fas fa-check"></i> Mở khóa tất cả cá</li><li><i class="fas fa-check"></i> Cá hiếm & VIP</li></ul><button class="btn-order" onclick="orderItem('Mod Cá - 20.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Cá')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item" style="--delay:2"><div class="mod-card-header"><div class="mod-icon">📈</div></div><h3>Mod Level</h3><div class="mod-price">10.000<span>đ</span></div><ul class="mod-features"><li><i class="fas fa-check"></i> Lên level theo yêu cầu</li></ul><button class="btn-order" onclick="orderItem('Mod Level - 10.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Level')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item" style="--delay:3"><div class="mod-card-header"><div class="mod-icon">🎒</div></div><h3>Mod Item</h3><div class="mod-price">20.000<span>đ</span></div><ul class="mod-features"><li><i class="fas fa-check"></i> Mở khóa tất cả item</li></ul><button class="btn-order" onclick="orderItem('Mod Item - 20.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Item')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item" style="--delay:4"><div class="mod-card-header"><div class="mod-icon">🐾</div></div><h3>Mod Pet</h3><div class="mod-price">20.000<span>đ</span></div><ul class="mod-features"><li><i class="fas fa-check"></i> Mở khóa tất cả pet</li></ul><button class="btn-order" onclick="orderItem('Mod Pet - 20.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Pet')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item" style="--delay:5"><div class="mod-card-header"><div class="mod-icon">💎</div><span class="mod-tag vip">VIP</span></div><h3>Mod Kim Cương</h3><div class="mod-price">30.000<span>đ</span><small>/1tr KC</small></div><ul class="mod-features"><li><i class="fas fa-check"></i> 1 triệu Kim Cương</li></ul><button class="btn-order" onclick="orderItem('Mod Kim Cương - 30.000đ/1tr KC')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button><button class="btn-review" onclick="openReview('Mod Kim Cương')"><i class="fas fa-star"></i> <span data-i18n="btn.review">Đánh giá</span></button></div>
+            <div class="mod-card gravity-item full-pack" style="--delay:6"><div class="mod-card-header"><div class="mod-icon">🏆</div><span class="mod-tag vip">FULL PACK</span></div><h3>Câu Cá Vạn Cân Full</h3><div class="mod-price contact">Liên hệ</div><button class="btn-order contact-btn" onclick="scrollToSection('contact')"><i class="fas fa-headset"></i> Liên hệ ngay</button></div>
         </div>
     </div>
 </section>
 
 <!-- SCRIPT -->
-<section id="scripts" class="section">
+<section id="scripts" class="section section-dark">
     <div class="container">
         <div class="section-header">
             <span class="section-badge">💻 SCRIPT ROBLOX</span>
             <h2 class="section-title">Script Game Roblox</h2>
         </div>
         <div class="script-grid gravity-container" id="scriptGrid">
-            <div class="script-card gravity-item visible" style="--delay: 0">
-                <div class="script-card-header"><div class="script-icon">🎯</div><span class="script-game">Roblox</span></div>
-                <h3>Sniper Arena</h3>
-                <p class="script-desc">Script Sniper Arena trên Roblox</p>
-                <div class="script-price">15.000<span>đ</span></div>
-                <button class="btn-order" onclick="orderItem('Script Sniper Arena - 15.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-            </div>
+            <div class="script-card gravity-item visible"><div class="script-card-header"><div class="script-icon">🎯</div><span class="script-game">Roblox</span></div><h3>Sniper Arena</h3><p class="script-desc">Script Sniper Arena Roblox</p><div class="script-price">15.000<span>đ</span></div><button class="btn-order" onclick="orderItem('Script Sniper Arena - 15.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button></div>
         </div>
     </div>
 </section>
 
 <!-- PRODUCTS -->
-<section id="products" class="section section-dark">
+<section id="products" class="section">
     <div class="container">
         <div class="section-header">
             <span class="section-badge">📦 SẢN PHẨM KHÁC</span>
-            <h2 class="section-title">Sản phẩm & Dịch vụ thêm</h2>
+            <h2 class="section-title">Sản phẩm & Dịch vụ</h2>
         </div>
         <div class="product-grid gravity-container">
-            <div class="product-card gravity-item" style="--delay: 0">
-                <div class="product-icon">📱</div>
-                <h3>Bản Mod (Tự Mod)</h3>
-                <p>Bản mod game đã được mod sẵn</p>
-                <div class="product-price">85.000<span>đ</span></div>
-                <button class="btn-order" onclick="orderItem('Bản Mod Tự Mod - 80.000đ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-            </div>
-            <div class="product-card gravity-item" style="--delay: 1">
-                <div class="product-icon">🎣</div>
-                <h3>Câu Chung (Theo Giờ)</h3>
-                <p>Thuê người câu chung farm theo giờ</p>
-                <div class="product-price">20.000<span>đ</span><small>/giờ</small></div>
-                <button class="btn-order" onclick="orderItem('Câu Chung Theo Giờ - 20.000đ/giờ')"><i class="fas fa-shopping-cart"></i> Đặt mua</button>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- REVIEWS -->
-<section id="reviews" class="section">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-badge">⭐ ĐÁNH GIÁ</span>
-            <h2 class="section-title">Khách hàng nói gì?</h2>
-        </div>
-        <div id="reviewsGrid" class="reviews-grid">
-            <p class="empty-state"><i class="fas fa-comments"></i> Chưa có đánh giá</p>
+            <div class="product-card gravity-item" style="--delay:0"><div class="product-icon">📱</div><h3>Bản Mod (Tự Mod)</h3><p>Bản mod game đã được mod sẵn</p><div class="product-price">85.000<span>đ</span></div><button class="btn-order" onclick="orderItem('Bản Mod Tự Mod - 85.000đ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button></div>
+            <div class="product-card gravity-item" style="--delay:1"><div class="product-icon">🎣</div><h3>Câu Chung (Theo Giờ)</h3><p>Thuê người câu farm theo giờ</p><div class="product-price">20.000<span>đ</span><small>/giờ</small></div><button class="btn-order" onclick="orderItem('Câu Chung Theo Giờ - 20.000đ/giờ')"><i class="fas fa-shopping-cart"></i> <span data-i18n="btn.buy">Đặt mua</span></button></div>
         </div>
     </div>
 </section>
@@ -381,16 +223,15 @@
                 <div class="payment-icon"><i class="fas fa-mobile-alt"></i></div>
                 <h3>Thẻ Cào</h3>
                 <div class="payment-info">
-                    <p>Hỗ trợ nạp qua thẻ cào</p>
-                    <p class="payment-note">⚠️ Chiết khấu 12-15%</p>
+                    <p>Hỗ trợ Viettel, Mobi, Vina</p>
+                    <p class="payment-note">⚠️ Chiết khấu 20-30%</p>
+                    <button class="btn-primary full" onclick="openCardModal()" style="margin-top:10px"><i class="fas fa-credit-card"></i> Nạp thẻ cào</button>
                 </div>
             </div>
             <div class="payment-card">
                 <div class="payment-icon"><i class="fas fa-coins"></i></div>
                 <h3>GCoin</h3>
-                <div class="payment-info">
-                    <p>Thanh toán qua GCoin</p>
-                </div>
+                <div class="payment-info"><p>Thanh toán qua GCoin</p><p>Liên hệ Zalo để biết tỷ giá</p></div>
             </div>
         </div>
     </div>
@@ -402,26 +243,15 @@
         <div class="section-header">
             <span class="section-badge">📞 LIÊN HỆ</span>
             <h2 class="section-title">Liên hệ với chúng tôi</h2>
-            <p class="section-desc">Hoạt động 8:00 - 23:00 hàng ngày</p>
         </div>
         <div class="contact-grid">
-            <a href="https://zalo.me/0564721862" target="_blank" class="contact-card">
-                <div class="contact-icon zalo"><i class="fas fa-comment-dots"></i></div>
-                <h3>Zalo</h3><p>0564 721 862</p>
-            </a>
-            <a href="https://t.me/ngonthe666" target="_blank" class="contact-card">
-                <div class="contact-icon telegram"><i class="fab fa-telegram-plane"></i></div>
-                <h3>Telegram</h3><p>@ngonthe666</p>
-            </a>
-            <a href="mailto:n799903@gmail.com" class="contact-card">
-                <div class="contact-icon email"><i class="fas fa-envelope"></i></div>
-                <h3>Email</h3><p>n799903@gmail.com</p>
-            </a>
+            <a href="https://zalo.me/0564721862" target="_blank" class="contact-card"><div class="contact-icon zalo"><i class="fas fa-comment-dots"></i></div><h3>Zalo</h3><p>0564 721 862</p></a>
+            <a href="https://t.me/ngonthe666" target="_blank" class="contact-card"><div class="contact-icon telegram"><i class="fab fa-telegram-plane"></i></div><h3>Telegram</h3><p>@ngonthe666</p></a>
+            <a href="mailto:n799903@gmail.com" class="contact-card"><div class="contact-icon email"><i class="fas fa-envelope"></i></div><h3>Email</h3><p>n799903@gmail.com</p></a>
         </div>
     </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="footer">
     <div class="container">
         <div class="footer-content">
@@ -431,262 +261,45 @@
     </div>
 </footer>
 
-<!-- LOGIN MODAL -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-sign-in-alt"></i> Đăng nhập</h2>
-            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Tên đăng nhập</label>
-                <input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập">
-            </div>
-            <div class="form-group">
-                <label>Mật khẩu</label>
-                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
-            </div>
-            <button class="btn-primary full" onclick="login()"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
-            <p class="form-switch">Chưa có tài khoản? <a onclick="switchModal('loginModal','registerModal')">Đăng ký</a></p>
-        </div>
-    </div>
-</div>
+<!-- LOGIN -->
+<div id="loginModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-sign-in-alt"></i> Đăng nhập</h2><button class="modal-close" onclick="closeModal('loginModal')">&times;</button></div><div class="modal-body"><div class="form-group"><label>Tên đăng nhập</label><input type="text" id="loginUsername"></div><div class="form-group"><label>Mật khẩu</label><input type="password" id="loginPassword"></div><button class="btn-primary full" onclick="login()"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button><p class="form-switch">Chưa có tài khoản? <a onclick="switchModal('loginModal','registerModal')">Đăng ký</a> | <a onclick="forgotPassword()">Quên mật khẩu?</a></p></div></div></div>
 
-<!-- REGISTER MODAL -->
-<div id="registerModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-user-plus"></i> Đăng ký</h2>
-            <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group"><label>Tên đăng nhập</label><input type="text" id="regUsername" placeholder="Tên đăng nhập"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="Email"></div>
-            <div class="form-group"><label>Số Zalo</label><input type="text" id="regZalo" placeholder="Số Zalo"></div>
-            <div class="form-group"><label>Mật khẩu</label><input type="password" id="regPassword" placeholder="Mật khẩu"></div>
-            <div class="form-group"><label>Xác nhận mật khẩu</label><input type="password" id="regPassword2" placeholder="Nhập lại"></div>
-            <div class="form-group"><label>Mã giới thiệu (tùy chọn)</label><input type="text" id="regReferral" placeholder="Mã của người giới thiệu"></div>
-            <button class="btn-primary full" onclick="register()"><i class="fas fa-user-plus"></i> Đăng ký</button>
-            <p class="form-switch">Đã có tài khoản? <a onclick="switchModal('registerModal','loginModal')">Đăng nhập</a></p>
-        </div>
-    </div>
-</div>
+<!-- REGISTER -->
+<div id="registerModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-user-plus"></i> Đăng ký</h2><button class="modal-close" onclick="closeModal('registerModal')">&times;</button></div><div class="modal-body"><div class="form-group"><label>Tên đăng nhập</label><input type="text" id="regUsername"></div><div class="form-group"><label>Email</label><input type="email" id="regEmail"></div><div class="form-group"><label>Số Zalo</label><input type="text" id="regZalo"></div><div class="form-group"><label>Mật khẩu</label><input type="password" id="regPassword"></div><div class="form-group"><label>Xác nhận mật khẩu</label><input type="password" id="regPassword2"></div><div class="form-group"><label>Mã giới thiệu (tùy chọn)</label><input type="text" id="regReferral"></div><button class="btn-primary full" onclick="register()"><i class="fas fa-user-plus"></i> Đăng ký</button><p class="form-switch">Đã có tài khoản? <a onclick="switchModal('registerModal','loginModal')">Đăng nhập</a></p></div></div></div>
 
-<!-- ORDER MODAL -->
-<div id="orderModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-shopping-cart"></i> Đặt đơn</h2>
-            <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Dịch vụ</label>
-                <select id="orderService" onchange="updateOrderPrice()">
-                    <optgroup label="🎮 Mod Game">
-                        <option value="Mod Skill - 10.000đ">Mod Skill - 10.000đ</option>
-                        <option value="Mod Cá - 20.000đ">Mod Cá - 20.000đ</option>
-                        <option value="Mod Level - 10.000đ">Mod Level - 10.000đ</option>
-                        <option value="Mod Item - 20.000đ">Mod Item - 20.000đ</option>
-                        <option value="Mod Pet - 20.000đ">Mod Pet - 20.000đ</option>
-                        <option value="Mod Kim Cương - 30.000đ/1tr KC">Mod Kim Cương - 30.000đ/1tr KC</option>
-                        <option value="Câu Cá Vạn Cân Full - Liên hệ">Câu Cá Vạn Cân Full - Liên hệ</option>
-                    </optgroup>
-                    <optgroup label="💻 Script Roblox">
-                        <option value="Script Sniper Arena - 15.000đ">Script Sniper Arena - 15.000đ</option>
-                    </optgroup>
-                    <optgroup label="📦 Sản phẩm khác">
-                        <option value="Bản Mod Tự Mod - 85.000đ">Bản Mod Tự Mod - 85.000đ</option>
-                        <option value="Câu Chung Theo Giờ - 20.000đ/giờ">Câu Chung Theo Giờ - 20.000đ/giờ</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div id="orderPriceDisplay" class="price-display"></div>
-            <div class="form-group">
-                <label>Mã giảm giá (tùy chọn)</label>
-                <div class="voucher-input">
-                    <input type="text" id="voucherCode" placeholder="VD: KNOX10">
-                    <button onclick="applyVoucher()" class="btn-apply">Áp dụng</button>
-                </div>
-                <div id="voucherStatus"></div>
-            </div>
-            <div class="form-group">
-                <label>Ghi chú</label>
-                <textarea id="orderNote" placeholder="VD: ID game, yêu cầu đặc biệt..."></textarea>
-            </div>
-            <div class="balance-notice">
-                <i class="fas fa-info-circle"></i> Tiền sẽ tự động trừ từ số dư
-            </div>
-            <button class="btn-primary full" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Xác nhận đặt đơn</button>
-        </div>
-    </div>
-</div>
+<!-- ORDER -->
+<div id="orderModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-shopping-cart"></i> Đặt đơn</h2><button class="modal-close" onclick="closeModal('orderModal')">&times;</button></div><div class="modal-body"><div class="form-group"><label>Dịch vụ</label><select id="orderService" onchange="updateOrderPrice()"><optgroup label="🎮 Mod Game"><option value="Mod Skill - 10.000đ">Mod Skill - 10.000đ</option><option value="Mod Cá - 20.000đ">Mod Cá - 20.000đ</option><option value="Mod Level - 10.000đ">Mod Level - 10.000đ</option><option value="Mod Item - 20.000đ">Mod Item - 20.000đ</option><option value="Mod Pet - 20.000đ">Mod Pet - 20.000đ</option><option value="Mod Kim Cương - 30.000đ/1tr KC">Mod Kim Cương - 30.000đ/1tr KC</option><option value="Câu Cá Vạn Cân Full - Liên hệ">Câu Cá Vạn Cân Full - Liên hệ</option></optgroup><optgroup label="💻 Script Roblox"><option value="Script Sniper Arena - 15.000đ">Script Sniper Arena - 15.000đ</option></optgroup><optgroup label="📦 Sản phẩm khác"><option value="Bản Mod Tự Mod - 85.000đ">Bản Mod Tự Mod - 85.000đ</option><option value="Câu Chung Theo Giờ - 20.000đ/giờ">Câu Chung Theo Giờ - 20.000đ/giờ</option></optgroup></select></div><div id="orderPriceDisplay" class="price-display"></div><div class="form-group"><label>Mã giảm giá</label><div class="voucher-input"><input type="text" id="voucherCode" placeholder="VD: KNOX10"><button onclick="applyVoucher()" class="btn-apply">Áp dụng</button></div><div id="voucherStatus"></div></div><div class="form-group"><label>Ghi chú</label><textarea id="orderNote" placeholder="VD: ID game..."></textarea></div><div class="balance-notice"><i class="fas fa-info-circle"></i> Tự động trừ từ số dư</div><button class="btn-primary full" onclick="placeOrder()"><i class="fas fa-paper-plane"></i> Xác nhận</button></div></div></div>
 
-<!-- DEPOSIT MODAL -->
-<div id="depositModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-wallet"></i> Nạp tiền</h2>
-            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Số tiền (VNĐ)</label>
-                <input type="number" id="depositAmount" placeholder="VD: 50000" min="10000" max="10000000">
-                <div class="quick-amounts">
-                    <button onclick="document.getElementById('depositAmount').value=10000">10K</button>
-                    <button onclick="document.getElementById('depositAmount').value=20000">20K</button>
-                    <button onclick="document.getElementById('depositAmount').value=50000">50K</button>
-                    <button onclick="document.getElementById('depositAmount').value=100000">100K</button>
-                    <button onclick="document.getElementById('depositAmount').value=200000">200K</button>
-                    <button onclick="document.getElementById('depositAmount').value=500000">500K</button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Phương thức</label>
-                <select id="depositMethod">
-                    <option value="VCB">Vietcombank</option>
-                    <option value="Thẻ cào">Thẻ cào</option>
-                    <option value="GCoin">GCoin</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Ghi chú</label><textarea id="depositNote" placeholder="Tuỳ chọn"></textarea></div>
-            <div class="deposit-info">
-                <h4><i class="fas fa-university"></i> Thông tin CK:</h4>
-                <p><strong>NH:</strong> Vietcombank</p>
-                <p><strong>STK:</strong> 1064291846 <button class="btn-copy-mini" onclick="copyText('1064291846')"><i class="fas fa-copy"></i></button></p>
-                <p><strong>Chủ TK:</strong> NGUYEN TRUNG NGUYEN</p>
-                <p><strong>Nội dung:</strong> NAP666 <button class="btn-copy-mini" onclick="copyText('NAP666')"><i class="fas fa-copy"></i></button></p>
-            </div>
-            <button class="btn-primary full" onclick="requestDeposit()"><i class="fas fa-paper-plane"></i> Gửi yêu cầu</button>
-        </div>
-    </div>
-</div>
+<!-- DEPOSIT -->
+<div id="depositModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-wallet"></i> Nạp tiền</h2><button class="modal-close" onclick="closeModal('depositModal')">&times;</button></div><div class="modal-body"><div class="form-group"><label>Số tiền (VNĐ)</label><input type="number" id="depositAmount" min="10000" max="10000000"><div class="quick-amounts"><button onclick="document.getElementById('depositAmount').value=10000">10K</button><button onclick="document.getElementById('depositAmount').value=20000">20K</button><button onclick="document.getElementById('depositAmount').value=50000">50K</button><button onclick="document.getElementById('depositAmount').value=100000">100K</button><button onclick="document.getElementById('depositAmount').value=200000">200K</button><button onclick="document.getElementById('depositAmount').value=500000">500K</button></div></div><div class="form-group"><label>Phương thức</label><select id="depositMethod"><option value="VCB">Vietcombank</option><option value="GCoin">GCoin</option></select></div><div class="form-group"><label>Ghi chú</label><textarea id="depositNote"></textarea></div><div class="deposit-info"><h4><i class="fas fa-university"></i> Thông tin CK:</h4><p><strong>STK:</strong> 1064291846 <button class="btn-copy-mini" onclick="copyText('1064291846')"><i class="fas fa-copy"></i></button></p><p><strong>Chủ TK:</strong> NGUYEN TRUNG NGUYEN</p><p><strong>Nội dung:</strong> NAP666 <button class="btn-copy-mini" onclick="copyText('NAP666')"><i class="fas fa-copy"></i></button></p></div><button class="btn-primary full" onclick="requestDeposit()"><i class="fas fa-paper-plane"></i> Gửi yêu cầu</button></div></div></div>
 
-<!-- HISTORY MODAL -->
-<div id="historyModal" class="modal">
-    <div class="modal-content modal-lg">
-        <div class="modal-header">
-            <h2><i class="fas fa-history"></i> Lịch sử giao dịch</h2>
-            <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="orderHistory" class="order-history"><p class="empty-state"><i class="fas fa-inbox"></i> Đang tải...</p></div>
-        </div>
-    </div>
-</div>
+<!-- CARD DEPOSIT -->
+<div id="cardModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-credit-card"></i> Nạp Thẻ Cào</h2><button class="modal-close" onclick="closeModal('cardModal')">&times;</button></div><div class="modal-body"><div class="card-warning"><i class="fas fa-exclamation-triangle"></i><div><strong>Lưu ý:</strong><p>Sai mệnh giá sẽ bị trừ 50% giá trị thẻ. Admin sẽ kiểm tra trong 5-15 phút.</p></div></div><div class="form-group"><label>Nhà mạng</label><select id="cardTelco"><option value="VIETTEL">Viettel</option><option value="MOBIFONE">Mobifone</option><option value="VINAPHONE">Vinaphone</option><option value="VIETNAMOBILE">Vietnamobile</option></select></div><div class="form-group"><label>Mệnh giá thẻ</label><select id="cardAmount"><option value="10000">10.000đ</option><option value="20000">20.000đ</option><option value="30000">30.000đ</option><option value="50000">50.000đ</option><option value="100000">100.000đ</option><option value="200000">200.000đ</option><option value="500000">500.000đ</option><option value="1000000">1.000.000đ</option></select></div><div class="form-group"><label>Số Seri thẻ</label><input type="text" id="cardSerial" placeholder="VD: 12345678901234"></div><div class="form-group"><label>Mã số thẻ</label><input type="text" id="cardCode" placeholder="VD: 123456789012345"></div><div class="card-rate"><p>💰 Nhận được: <strong id="cardReceived">7.000đ</strong> (sau chiết khấu 30%)</p></div><button class="btn-primary full" onclick="submitCard()"><i class="fas fa-paper-plane"></i> Gửi thẻ</button></div></div></div>
 
-<!-- DASHBOARD MODAL -->
-<div id="dashboardModal" class="modal">
-    <div class="modal-content modal-lg">
-        <div class="modal-header">
-            <h2><i class="fas fa-chart-line"></i> Dashboard cá nhân</h2>
-            <button class="modal-close" onclick="closeModal('dashboardModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="dashboardContent"><p class="empty-state"><i class="fas fa-spinner fa-spin"></i> Đang tải...</p></div>
-        </div>
-    </div>
-</div>
+<!-- HISTORY -->
+<div id="historyModal" class="modal"><div class="modal-content modal-lg"><div class="modal-header"><h2><i class="fas fa-history"></i> Lịch sử giao dịch</h2><button class="modal-close" onclick="closeModal('historyModal')">&times;</button></div><div class="modal-body"><div id="orderHistory" class="order-history"></div></div></div></div>
 
-<!-- NOTIFICATION MODAL -->
-<div id="notificationModal" class="modal">
-    <div class="modal-content modal-lg">
-        <div class="modal-header">
-            <h2><i class="fas fa-bell"></i> Thông báo</h2>
-            <button class="modal-close" onclick="closeModal('notificationModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="notificationContent"><p class="empty-state"><i class="fas fa-bell-slash"></i> Đang tải...</p></div>
-        </div>
-    </div>
-</div>
+<!-- DASHBOARD -->
+<div id="dashboardModal" class="modal"><div class="modal-content modal-lg"><div class="modal-header"><h2><i class="fas fa-chart-line"></i> Dashboard</h2><button class="modal-close" onclick="closeModal('dashboardModal')">&times;</button></div><div class="modal-body"><div id="dashboardContent"></div></div></div></div>
 
-<!-- REFERRAL MODAL -->
-<div id="referralModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-user-friends"></i> Giới thiệu bạn bè</h2>
-            <button class="modal-close" onclick="closeModal('referralModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="referral-info">
-                <div class="referral-bonus">
-                    <i class="fas fa-gift"></i>
-                    <div>
-                        <h3>Nhận 10.000đ mỗi bạn!</h3>
-                        <p>Khi bạn của bạn nạp tiền lần đầu</p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Mã giới thiệu của bạn:</label>
-                    <div class="referral-code">
-                        <input type="text" id="myReferralCode" readonly>
-                        <button onclick="copyReferral()"><i class="fas fa-copy"></i> Copy</button>
-                    </div>
-                </div>
-                <div class="referral-stats">
-                    <div class="ref-stat">
-                        <span>Bạn đã giới thiệu:</span>
-                        <strong id="referralCount">0 người</strong>
-                    </div>
-                    <div class="ref-stat">
-                        <span>Tổng thưởng:</span>
-                        <strong id="referralEarn">0đ</strong>
-                    </div>
-                </div>
-                <p class="referral-note">💡 Chia sẻ mã này, người khác đăng ký sẽ nhập mã. Khi họ nạp tiền lần đầu, bạn nhận 10.000đ!</p>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- NOTIFICATIONS -->
+<div id="notificationModal" class="modal"><div class="modal-content modal-lg"><div class="modal-header"><h2><i class="fas fa-bell"></i> Thông báo</h2><button class="modal-close" onclick="closeModal('notificationModal')">&times;</button></div><div class="modal-body"><div id="notificationContent"></div></div></div></div>
 
-<!-- CHANGE PASSWORD MODAL -->
-<div id="changePassModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-key"></i> Đổi mật khẩu</h2>
-            <button class="modal-close" onclick="closeModal('changePassModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group"><label>Mật khẩu hiện tại</label><input type="password" id="oldPass" placeholder="Mật khẩu cũ"></div>
-            <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="newPass" placeholder="Mật khẩu mới"></div>
-            <div class="form-group"><label>Xác nhận mật khẩu mới</label><input type="password" id="newPass2" placeholder="Nhập lại"></div>
-            <button class="btn-primary full" onclick="changePassword()"><i class="fas fa-check"></i> Đổi mật khẩu</button>
-        </div>
-    </div>
-</div>
+<!-- REFERRAL -->
+<div id="referralModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-user-friends"></i> Giới thiệu bạn</h2><button class="modal-close" onclick="closeModal('referralModal')">&times;</button></div><div class="modal-body"><div class="referral-info"><div class="referral-bonus"><i class="fas fa-gift"></i><div><h3>Nhận 10.000đ mỗi bạn!</h3><p>Khi bạn nạp tiền lần đầu</p></div></div><div class="form-group"><label>Mã của bạn:</label><div class="referral-code"><input type="text" id="myReferralCode" readonly><button onclick="copyReferral()"><i class="fas fa-copy"></i></button></div></div><p class="referral-note">💡 Chia sẻ mã, người khác đăng ký nhập mã. Khi họ nạp tiền lần đầu, bạn nhận 10.000đ!</p></div></div></div></div>
 
-<!-- REVIEW MODAL -->
-<div id="reviewModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-star"></i> Đánh giá <span id="reviewService"></span></h2>
-            <button class="modal-close" onclick="closeModal('reviewModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Đánh giá (1-5 sao)</label>
-                <div class="rating-stars" id="ratingStars">
-                    <i class="fas fa-star" data-rating="1"></i>
-                    <i class="fas fa-star" data-rating="2"></i>
-                    <i class="fas fa-star" data-rating="3"></i>
-                    <i class="fas fa-star" data-rating="4"></i>
-                    <i class="fas fa-star" data-rating="5"></i>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Bình luận</label>
-                <textarea id="reviewComment" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
-            </div>
-            <button class="btn-primary full" onclick="submitReview()"><i class="fas fa-paper-plane"></i> Gửi đánh giá</button>
-        </div>
-    </div>
-</div>
+<!-- CHANGE PASS -->
+<div id="changePassModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-key"></i> Đổi mật khẩu</h2><button class="modal-close" onclick="closeModal('changePassModal')">&times;</button></div><div class="modal-body"><div class="form-group"><label>Mật khẩu hiện tại</label><input type="password" id="oldPass"></div><div class="form-group"><label>Mật khẩu mới</label><input type="password" id="newPass"></div><div class="form-group"><label>Xác nhận</label><input type="password" id="newPass2"></div><button class="btn-primary full" onclick="changePassword()"><i class="fas fa-check"></i> Đổi mật khẩu</button></div></div></div>
+
+<!-- REVIEW -->
+<div id="reviewModal" class="modal"><div class="modal-content"><div class="modal-header"><h2><i class="fas fa-star"></i> Đánh giá</h2><button class="modal-close" onclick="closeModal('reviewModal')">&times;</button></div><div class="modal-body"><h3 id="reviewService" style="text-align:center;color:var(--accent);margin-bottom:20px"></h3><div class="form-group"><label>Đánh giá</label><div class="rating-stars" id="ratingStars"><i class="fas fa-star" data-rating="1"></i><i class="fas fa-star" data-rating="2"></i><i class="fas fa-star" data-rating="3"></i><i class="fas fa-star" data-rating="4"></i><i class="fas fa-star" data-rating="5"></i></div></div><div class="form-group"><label>Bình luận</label><textarea id="reviewComment" placeholder="Trải nghiệm của bạn..."></textarea></div><button class="btn-primary full" onclick="submitReview()"><i class="fas fa-paper-plane"></i> Gửi đánh giá</button></div></div></div>
+
+<!-- TICKET -->
+<div id="ticketModal" class="modal"><div class="modal-content modal-lg"><div class="modal-header"><h2><i class="fas fa-headset"></i> Hỗ trợ</h2><button class="modal-close" onclick="closeModal('ticketModal')">&times;</button></div><div class="modal-body"><div class="ticket-tabs"><button class="ticket-tab active" onclick="showTicketTab('list', this)">📋 Yêu cầu của tôi</button><button class="ticket-tab" onclick="showTicketTab('new', this)">➕ Tạo mới</button></div><div id="ticketList" class="ticket-content active"></div><div id="ticketNew" class="ticket-content"><div class="form-group"><label>Tiêu đề</label><input type="text" id="ticketSubject" placeholder="VD: Đơn KNX-123 chưa nhận"></div><div class="form-group"><label>Nội dung</label><textarea id="ticketMessage" placeholder="Mô tả chi tiết vấn đề..."></textarea></div><button class="btn-primary full" onclick="submitTicket()"><i class="fas fa-paper-plane"></i> Gửi yêu cầu</button></div></div></div></div>
 
 <div id="toast" class="toast"></div>
 
+<script src="lang.js"></script>
 <script src="app.js"></script>
 </body>
-                    </html>
+                                                   </html>
