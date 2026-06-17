@@ -136,19 +136,45 @@ async function refreshUserInfo(){
     }catch(e){console.error(e)}
 }
 setInterval(refreshUserInfo,10000);
+async function login(){
+    const username=document.getElementById('loginUsername').value.trim();
+    const password=document.getElementById('loginPassword').value;
+    if(!username||!password)return toast('Điền đầy đủ!','error');
 
-async function logLogin(username,success){
-    if(!sb)return;
+    // CHECK ADMIN TRƯỚC (quan trọng!)
+    if(username===ADMIN_USERNAME&&password===ADMIN_PASSWORD){
+        setUser({username:'admin',isAdmin:true});
+        toast('✅ Đăng nhập Admin thành công!','success');
+        closeModal('loginModal');
+        setTimeout(()=>window.location.href='admin.html',800);
+        return;
+    }
+    
+    // Nếu nhập sai admin password
+    if(username===ADMIN_USERNAME){
+        return toast('❌ Mật khẩu Admin sai!','error');
+    }
+    
+    if(!sb)return toast('Database chưa kết nối!','error');
+
     try{
-        const browser=navigator.userAgent.includes('Chrome')?'Chrome':navigator.userAgent.includes('Firefox')?'Firefox':navigator.userAgent.includes('Safari')?'Safari':'Other';
-        const device=/Mobile|Android|iPhone/.test(navigator.userAgent)?'Mobile':'Desktop';
-        const ipResp=await fetch('https://api.ipify.org?format=json').catch(()=>null);
-        const ip=ipResp?(await ipResp.json()).ip:'unknown';
-        await sb.from('login_history').insert([{username,ip,device,browser,success}]);
-        if(success)await sb.from('users').update({last_login:new Date().toISOString(),last_ip:ip,last_device:`${device} - ${browser}`}).eq('username',username);
-    }catch(e){}
+        const{data:user,error}=await sb.from('users').select('*').eq('username',username).eq('password',password).maybeSingle();
+        if(error)return toast('Lỗi: '+error.message,'error');
+        if(!user){
+            await logLogin(username,false);
+            const{data:cu}=await sb.from('users').select('username').eq('username',username).maybeSingle();
+            if(!cu)return toast('❌ Tên không tồn tại!','error');
+            return toast('❌ Mật khẩu sai!','error');
+        }
+        if(user.is_locked)return toast('🔒 Tài khoản đã bị khóa!','error');
+        setUser({username:user.username,isAdmin:false});
+        await logLogin(username,true);
+        toast('✅ Đăng nhập thành công!','success');
+        closeModal('loginModal');
+        showUserBar(user.username);
+        await refreshUserInfo();
+    }catch(e){toast('Lỗi: '+e.message,'error')}
 }
-
 async function register(){
     if(!sb)return toast('Database chưa kết nối!','error');
     const username=document.getElementById('regUsername').value.trim();
