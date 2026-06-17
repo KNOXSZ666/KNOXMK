@@ -677,3 +677,41 @@ function copyText(text){
     if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>toast('Đã copy: '+text,'success'));
     else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Đã copy: '+text,'success')}
                                                                            }
+// === MATRIX RAIN EFFECT (LIGHTWEIGHT) ===
+(function initMatrix(){
+    const canvas=document.getElementById('matrixCanvas');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    let w=canvas.width=window.innerWidth;
+    let h=canvas.height=window.innerHeight;
+    const fontSize=14;
+    let cols=Math.floor(w/fontSize);
+    const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+    const drops=Array(cols).fill(0);
+    
+    function draw(){
+        ctx.fillStyle='rgba(6,6,15,0.08)';
+        ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#00f0ff';
+        ctx.font=fontSize+'px monospace';
+        for(let i=0;i<drops.length;i++){
+            const t=chars[Math.floor(Math.random()*chars.length)];
+            ctx.fillText(t,i*fontSize,drops[i]*fontSize);
+            if(drops[i]*fontSize>h&&Math.random()>0.975)drops[i]=0;
+            drops[i]++;
+        }
+    }
+    
+    let lastTime=0;
+    function animate(time){
+        if(time-lastTime>80){draw();lastTime=time}
+        requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+    
+    window.addEventListener('resize',()=>{
+        w=canvas.width=window.innerWidth;
+        h=canvas.height=window.innerHeight;
+        cols=Math.floor(w/fontSize);
+    });
+})();
