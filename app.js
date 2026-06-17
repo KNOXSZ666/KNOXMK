@@ -528,7 +528,6 @@ async function loadDashboard(){
         c.innerHTML=`<div class="dashboard-stats"><div class="dash-stat"><div class="dash-stat-icon">💰</div><div class="dash-stat-value">${fm(user?.balance||0)}</div><div class="dash-stat-label">Số dư</div></div><div class="dash-stat"><div class="dash-stat-icon">📈</div><div class="dash-stat-value">${fm(user?.total_deposited||0)}</div><div class="dash-stat-label">Tổng nạp</div></div><div class="dash-stat"><div class="dash-stat-icon">🛒</div><div class="dash-stat-value">${fm(user?.total_spent||0)}</div><div class="dash-stat-label">Tổng chi</div></div><div class="dash-stat"><div class="dash-stat-icon">📦</div><div class="dash-stat-value">${totalOrders}</div><div class="dash-stat-label">Đơn hàng</div></div><div class="dash-stat"><div class="dash-stat-icon">✅</div><div class="dash-stat-value">${completed}</div><div class="dash-stat-label">Hoàn thành</div></div><div class="dash-stat"><div class="dash-stat-icon">${vip.icon}</div><div class="dash-stat-value" style="font-size:1.1rem">${vip.name}</div><div class="dash-stat-label">VIP</div></div></div>${nextVip?`<div style="background:rgba(139,92,246,0.1);border:1px solid var(--primary);padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:var(--accent);font-weight:600">🎯 Nạp thêm ${fm(remaining)} để lên ${nextVip.name}</p></div>`:`<div style="background:rgba(245,158,11,0.1);border:1px solid #f59e0b;padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:#f59e0b;font-weight:600">🏆 VIP cao nhất!</p></div>`}<div style="margin-top:15px;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.3);padding:12px;border-radius:var(--radius-sm)"><p style="color:#22c55e"><i class="fas fa-tag"></i> Ưu đãi: <strong>Giảm ${vip.discount}%</strong></p></div>`;
     }catch(e){c.innerHTML='<p class="empty-state">Lỗi</p>'}
 }
-
 async function loadNotifications(){
     const u=getUser();if(!u||!sb)return;
     const c=document.getElementById('notificationContent');
@@ -647,6 +646,8 @@ async function submitTicket(){
 function copyReferral(){copyText(document.getElementById('myReferralCode').value)}
 function toggleChat(){document.getElementById('chatBox')?.classList.toggle('hidden')}
 
+    }
+
 function openModal(id){
     const m=document.getElementById(id);
     if(m){
@@ -677,8 +678,7 @@ function copyText(text){
     if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>toast('Đã copy: '+text,'success'));
     else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Đã copy: '+text,'success')}
                                                                            }
-// === MATRIX RAIN EFFECT (LIGHTWEIGHT) ===
-(function initMatrix(){
+
     const canvas=document.getElementById('matrixCanvas');
     if(!canvas)return;
     const ctx=canvas.getContext('2d');
