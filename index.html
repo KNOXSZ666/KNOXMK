@@ -28,8 +28,28 @@
 <nav id="navbar">
     <div class="nav-container">
         <div class="nav-logo" onclick="scrollToSection('home')">
-            <span class="logo-icon">⚡</span>
-            <span class="logo-text">KNOX</span>
+    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#06b6d4"/>
+                <stop offset="50%" style="stop-color:#a855f7"/>
+                <stop offset="100%" style="stop-color:#ec4899"/>
+            </linearGradient>
+            <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#fff"/>
+                <stop offset="100%" style="stop-color:#e879f9"/>
+            </linearGradient>
+        </defs>
+        <g class="logo-bg">
+            <polygon points="50,5 90,30 90,70 50,95 10,70 10,30" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+            <polygon points="50,15 80,32 80,68 50,85 20,68 20,32" fill="rgba(168,85,247,0.1)" stroke="url(#logoGrad)" stroke-width="1.5"/>
+        </g>
+        <g class="logo-letter">
+            <path d="M 32 30 L 32 70 M 32 50 L 50 30 M 32 50 L 50 70 M 60 30 L 60 70 M 60 30 L 78 70 M 78 30 L 78 70" 
+                  stroke="url(#logoGrad2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </g>
+    </svg>
+    <span class="logo-text">KNOX</span>
         </div>
         <div class="nav-links" id="navLinks">
             <a onclick="scrollToSection('home')" data-i18n="nav.home">Trang chủ</a>
