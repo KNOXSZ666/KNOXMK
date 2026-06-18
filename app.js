@@ -29,21 +29,11 @@ function genCode(p){return p+'-'+Date.now().toString().slice(-6)+Math.floor(Math
 
 function initSupabase(){try{if(window.supabase){sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return true}}catch(e){console.error(e)}return false}
 
-// PWA
-if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
-}
-window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    if(!localStorage.getItem('pwa_dismissed')){
-        setTimeout(()=>document.getElementById('pwaBanner')?.classList.remove('hidden'),3000);
-    }
-});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!localStorage.getItem('pwa_dismissed')){setTimeout(()=>document.getElementById('pwaBanner')?.classList.remove('hidden'),3000)}});
 function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;dismissPWA()})}}
 function dismissPWA(){document.getElementById('pwaBanner')?.classList.add('hidden');localStorage.setItem('pwa_dismissed','1')}
 
-// MUSIC PLAYER
 function toggleMusic(){
     const audio=document.getElementById('bgMusic');
     const btn=document.getElementById('musicBtn');
@@ -72,54 +62,21 @@ window.addEventListener('DOMContentLoaded',()=>{
     initCountUp();
     initRatingStars();
     checkAuth();
-    if(sb){
-        loadScripts();
-        loadHotDeals();
-        loadTopDeposit();
-    }
+    if(sb){loadScripts();loadHotDeals();loadTopDeposit()}
     setTimeout(()=>document.getElementById('chatWidget')?.classList.remove('hidden'),2000);
 });
 
-function initParticles(){
-    const c=document.getElementById('particles');if(!c)return;
-    for(let i=0;i<10;i++){
-        const p=document.createElement('div');
-        p.className='particle';
-        p.style.left=Math.random()*100+'%';
-        p.style.animationDuration=(Math.random()*8+8)+'s';
-        p.style.animationDelay=Math.random()*10+'s';
-        c.appendChild(p);
-    }
-}
+function initParticles(){const c=document.getElementById('particles');if(!c)return;for(let i=0;i<10;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*8+8)+'s';p.style.animationDelay=Math.random()*10+'s';c.appendChild(p)}}
 function initNavbar(){window.addEventListener('scroll',()=>{const n=document.getElementById('navbar');if(n)n.classList.toggle('scrolled',window.scrollY>50)})}
 function toggleMenu(){document.getElementById('navLinks')?.classList.toggle('active')}
 function closeMobileMenu(){document.getElementById('navLinks')?.classList.remove('active')}
-function scrollToSection(id){
-    const el=document.getElementById(id);
-    if(el){const y=el.getBoundingClientRect().top+window.pageYOffset-80;window.scrollTo({top:y,behavior:'smooth'})}
-    closeMobileMenu();
-}
-function initGravity(){
-    if(!('IntersectionObserver' in window)){document.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'));return}
-    const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'))}),{threshold:0.1});
-    document.querySelectorAll('.gravity-container').forEach(c=>obs.observe(c));
-}
-function initCountUp(){
-    if(!('IntersectionObserver' in window))return;
-    const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.stat-number').forEach(c=>animateCount(c,parseInt(c.getAttribute('data-count'))));obs.unobserve(e.target)}}),{threshold:0.5});
-    const s=document.querySelector('.hero-stats');if(s)obs.observe(s);
-}
+function scrollToSection(id){const el=document.getElementById(id);if(el){const y=el.getBoundingClientRect().top+window.pageYOffset-80;window.scrollTo({top:y,behavior:'smooth'})}closeMobileMenu()}
+function initGravity(){if(!('IntersectionObserver' in window)){document.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'));return}const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'))}),{threshold:0.1});document.querySelectorAll('.gravity-container').forEach(c=>obs.observe(c))}
+function initCountUp(){if(!('IntersectionObserver' in window))return;const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.stat-number').forEach(c=>animateCount(c,parseInt(c.getAttribute('data-count'))));obs.unobserve(e.target)}}),{threshold:0.5});const s=document.querySelector('.hero-stats');if(s)obs.observe(s)}
 function animateCount(el,target){let c=0,s=target/125;const t=setInterval(()=>{c+=s;if(c>=target){c=target;clearInterval(t)}el.textContent=Math.floor(c)},16)}
-function initRatingStars(){
-    document.querySelectorAll('#ratingStars i').forEach(s=>{
-        s.onclick=()=>{currentRating=parseInt(s.getAttribute('data-rating'));document.querySelectorAll('#ratingStars i').forEach(x=>x.classList.toggle('active',parseInt(x.getAttribute('data-rating'))<=currentRating))};
-    });
-}
+function initRatingStars(){document.querySelectorAll('#ratingStars i').forEach(s=>{s.onclick=()=>{currentRating=parseInt(s.getAttribute('data-rating'));document.querySelectorAll('#ratingStars i').forEach(x=>x.classList.toggle('active',parseInt(x.getAttribute('data-rating'))<=currentRating))}})}
 
-async function checkAuth(){
-    const u=getUser();
-    if(u){showUserBar(u.username);if(sb&&!u.isAdmin){await refreshUserInfo();await loadNotificationCount()}}
-}
+async function checkAuth(){const u=getUser();if(u){showUserBar(u.username);if(sb&&!u.isAdmin){await refreshUserInfo();await loadNotificationCount()}}}
 
 async function refreshUserInfo(){
     const u=getUser();if(!u||!sb||u.isAdmin)return;
@@ -170,13 +127,11 @@ async function register(){
     const password=document.getElementById('regPassword').value;
     const password2=document.getElementById('regPassword2').value;
     const referral=document.getElementById('regReferral').value.trim();
-
     if(!username||!email||!password)return toast('Điền đầy đủ!','error');
     if(username.length<3)return toast('Tên từ 3 ký tự!','error');
     if(password.length<6)return toast('Mật khẩu từ 6 ký tự!','error');
     if(password!==password2)return toast('Mật khẩu không khớp!','error');
     if(username===ADMIN_USERNAME)return toast('Tên không dùng được!','error');
-
     try{
         const{data:ex}=await sb.from('users').select('username').eq('username',username).maybeSingle();
         if(ex)return toast('Tên đã tồn tại!','error');
@@ -194,7 +149,6 @@ async function login(){
     const username=document.getElementById('loginUsername').value.trim();
     const password=document.getElementById('loginPassword').value;
     if(!username||!password)return toast('Điền đầy đủ!','error');
-
     if(username===ADMIN_USERNAME&&password===ADMIN_PASSWORD){
         setUser({username:'admin',isAdmin:true});
         toast('Đăng nhập Admin!','success');
@@ -204,7 +158,6 @@ async function login(){
     }
     if(username===ADMIN_USERNAME)return toast('❌ Mật khẩu Admin sai!','error');
     if(!sb)return toast('Database chưa kết nối!','error');
-
     try{
         const{data:user,error}=await sb.from('users').select('*').eq('username',username).eq('password',password).maybeSingle();
         if(error)return toast('Lỗi: '+error.message,'error');
@@ -239,9 +192,7 @@ function showUserBar(username){
     const bl=document.getElementById('btnLogin');if(bl)bl.style.display='none';
 }
 
-function forgotPassword(){
-    alert('🔑 QUÊN MẬT KHẨU\n\nLiên hệ Admin:\n📱 Zalo: 0564 721 862\n💬 Telegram: @ngonthe666\n\nCung cấp tên đăng nhập + email để admin reset!');
-}
+function forgotPassword(){alert('🔑 QUÊN MẬT KHẨU\n\nLiên hệ Admin:\n📱 Zalo: 0564 721 862\n💬 Telegram: @ngonthe666')}
 
 async function loadScripts(){
     if(!sb)return;
@@ -347,14 +298,27 @@ async function placeOrder(){
     const u=getUser();if(!u||!sb)return toast('Vui lòng đăng nhập!','error');
     const service=document.getElementById('orderService').value;
     const note=document.getElementById('orderNote').value.trim();
+    const gameUsername=document.getElementById('gameUsername').value.trim();
+    const gamePassword=document.getElementById('gamePassword').value.trim();
     let price=getPrice(service);
     const code=genCode('KNX');
 
+    if(!gameUsername||!gamePassword)return toast('⚠️ Vui lòng nhập đầy đủ tài khoản và mật khẩu game!','error');
+    if(gameUsername.length<3)return toast('Tài khoản game tối thiểu 3 ký tự!','error');
+    if(gamePassword.length<3)return toast('Mật khẩu game tối thiểu 3 ký tự!','error');
+
     if(price===0){
         try{
-            await sb.from('orders').insert([{order_code:code,username:u.username,service,payment:'Liên hệ',note,price:0,status:'pending'}]);
+            await sb.from('orders').insert([{
+                order_code:code,username:u.username,service,
+                payment:'Liên hệ',note,price:0,status:'pending',
+                game_username:gameUsername,game_password:gamePassword
+            }]);
             toast(`Đặt đơn thành công! Mã: ${code}`,'success');
             closeModal('orderModal');
+            document.getElementById('gameUsername').value='';
+            document.getElementById('gamePassword').value='';
+            document.getElementById('orderNote').value='';
         }catch(e){toast('Lỗi!','error')}
         return;
     }
@@ -370,13 +334,20 @@ async function placeOrder(){
             return;
         }
         await sb.from('users').update({balance:balance-price,total_spent:(userData.total_spent||0)+price}).eq('username',u.username);
-        await sb.from('orders').insert([{order_code:code,username:u.username,service,payment:currentVoucher?`Số dư (${currentVoucher.code})`:'Số dư',note,price,status:'pending',progress:0}]);
+        await sb.from('orders').insert([{
+            order_code:code,username:u.username,service,
+            payment:currentVoucher?`Số dư (${currentVoucher.code})`:'Số dư',
+            note,price,status:'pending',progress:0,
+            game_username:gameUsername,game_password:gamePassword
+        }]);
         if(currentVoucher)await sb.from('vouchers').update({used_count:currentVoucher.used_count+1}).eq('code',currentVoucher.code);
         addNotification('🛒 Mua hàng',`Đặt mua "${service}" thành công! Đã trừ ${fm(price)}.`);
         toast(`✅ Đặt đơn thành công! Mã: ${code}`,'success');
         closeModal('orderModal');
         document.getElementById('orderNote').value='';
         document.getElementById('voucherCode').value='';
+        document.getElementById('gameUsername').value='';
+        document.getElementById('gamePassword').value='';
         currentVoucher=null;
         await refreshUserInfo();
     }catch(e){toast('Lỗi: '+e.message,'error')}
@@ -404,18 +375,8 @@ async function requestDeposit(){
     }catch(e){toast('Lỗi: '+e.message,'error')}
 }
 
-function openCardModal(){
-    const u=getUser();if(!u){toast('Vui lòng đăng nhập!','info');openModal('loginModal');return}
-    updateCardReceived();
-    document.getElementById('cardAmount').onchange=updateCardReceived;
-    openModal('cardModal');
-}
-function updateCardReceived(){
-    const amount=parseInt(document.getElementById('cardAmount').value)||0;
-    const received=Math.floor(amount*0.7);
-    const el=document.getElementById('cardReceived');
-    if(el)el.textContent=fm(received);
-}
+function openCardModal(){const u=getUser();if(!u){toast('Vui lòng đăng nhập!','info');openModal('loginModal');return}updateCardReceived();document.getElementById('cardAmount').onchange=updateCardReceived;openModal('cardModal')}
+function updateCardReceived(){const amount=parseInt(document.getElementById('cardAmount').value)||0;const received=Math.floor(amount*0.7);const el=document.getElementById('cardReceived');if(el)el.textContent=fm(received)}
 async function submitCard(){
     const u=getUser();if(!u||!sb)return toast('Vui lòng đăng nhập!','error');
     const telco=document.getElementById('cardTelco').value;
@@ -466,7 +427,15 @@ async function loadHistory(){
                     if(!o.rating)actions+=`<button class="btn-mini" onclick="openReviewOrder('${o.order_code}','${o.service}')"><i class="fas fa-star"></i> Đánh giá</button>`;
                 }
                 const progress=o.progress||0;
-                return `<div class="order-item"><div class="order-item-header"><span class="order-id">${o.order_code}</span><span class="order-status ${s.c}">${s.l}</span></div><p><strong>Dịch vụ:</strong> ${o.service}</p>${o.price>0?`<p><strong>Giá:</strong> ${fm(o.price)}</p>`:''}${o.note?`<p><strong>Ghi chú:</strong> ${o.note}</p>`:''}<p><strong>Thời gian:</strong> ${new Date(o.created_at).toLocaleString('vi-VN')}</p>${o.status==='processing'||o.status==='pending'?`<div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div><p style="font-size:0.75rem;text-align:right">Tiến độ: ${progress}%</p>`:''}${actions?`<div class="order-actions">${actions}</div>`:''}</div>`;
+                let gameInfo='';
+                if(o.game_username||o.game_password){
+                    gameInfo=`<div class="game-info-display"><div class="game-info-title"><i class="fas fa-gamepad"></i> Thông tin game đã gửi</div>${o.game_username?`<div class="game-info-row"><span>Tài khoản:</span><strong>${o.game_username}</strong><button class="btn-copy-mini" onclick="copyText('${o.game_username}')"><i class="fas fa-copy"></i></button></div>`:''}${o.game_password?`<div class="game-info-row"><span>Mật khẩu:</span><strong>${o.game_password}</strong><button class="btn-copy-mini" onclick="copyText('${o.game_password}')"><i class="fas fa-copy"></i></button></div>`:''}</div>`;
+                }
+                let rejectBox='';
+                if(o.status==='cancelled'&&o.reject_reason){
+                    rejectBox=`<div class="reject-reason-box"><b>❌ Lý do từ chối:</b><p>${o.reject_reason}</p></div>`;
+                }
+                return `<div class="order-item"><div class="order-item-header"><span class="order-id">${o.order_code}</span><span class="order-status ${s.c}">${s.l}</span></div><p><strong>Dịch vụ:</strong> ${o.service}</p>${o.price>0?`<p><strong>Giá:</strong> ${fm(o.price)}</p>`:''}${o.note?`<p><strong>Ghi chú:</strong> ${o.note}</p>`:''}<p><strong>Thời gian:</strong> ${new Date(o.created_at).toLocaleString('vi-VN')}</p>${gameInfo}${rejectBox}${o.status==='processing'||o.status==='pending'?`<div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div><p style="font-size:0.75rem;text-align:right">Tiến độ: ${progress}%</p>`:''}${actions?`<div class="order-actions">${actions}</div>`:''}</div>`;
             }).join('');
         }
         if(!html)html='<p class="empty-state"><i class="fas fa-inbox"></i> Chưa có giao dịch</p>';
@@ -480,7 +449,7 @@ async function cancelOrder(code,price){
     try{
         const{data:user}=await sb.from('users').select('balance').eq('username',u.username).maybeSingle();
         await sb.from('users').update({balance:(user.balance||0)+price}).eq('username',u.username);
-        await sb.from('orders').update({status:'cancelled'}).eq('order_code',code);
+        await sb.from('orders').update({status:'cancelled',reject_reason:'Người dùng tự hủy'}).eq('order_code',code);
         addNotification('❌ Hủy đơn',`Đã hủy đơn ${code} và hoàn ${fm(price)} vào ví.`);
         toast(`✅ Đã hủy & hoàn ${fm(price)}!`,'success');
         await refreshUserInfo();
@@ -489,14 +458,12 @@ async function cancelOrder(code,price){
 }
 
 function openReviewOrder(orderCode,service){
-    currentReviewService=service;
-    currentRating=0;
+    currentReviewService=service;currentRating=0;
     document.getElementById('reviewService').textContent=service;
     document.getElementById('reviewComment').value='';
     document.querySelectorAll('#ratingStars i').forEach(s=>s.classList.remove('active'));
     window._reviewOrderCode=orderCode;
-    closeModal('historyModal');
-    openModal('reviewModal');
+    closeModal('historyModal');openModal('reviewModal');
 }
 
 async function loadDashboard(){
@@ -653,12 +620,8 @@ function closeModal(id){const m=document.getElementById(id);if(m){m.classList.re
 function switchModal(f,t){closeModal(f);setTimeout(()=>openModal(t),200)}
 document.addEventListener('click',e=>{if(e.target.classList.contains('modal')){e.target.classList.remove('active');document.body.style.overflow=''}});
 
-function toast(msg,type='info'){
-    const t=document.getElementById('toast');if(!t)return;
-    t.textContent=msg;t.className=`toast ${type} show`;
-    setTimeout(()=>t.classList.remove('show'),3500);
-}
+function toast(msg,type='info'){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3500)}
 function copyText(text){
     if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>toast('Đã copy: '+text,'success'));
     else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Đã copy: '+text,'success')}
-    }
+}
