@@ -68,8 +68,18 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 function initParticles(){const c=document.getElementById('particles');if(!c)return;for(let i=0;i<10;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*8+8)+'s';p.style.animationDelay=Math.random()*10+'s';c.appendChild(p)}}
 function initNavbar(){window.addEventListener('scroll',()=>{const n=document.getElementById('navbar');if(n)n.classList.toggle('scrolled',window.scrollY>50)})}
-function toggleMenu(){document.getElementById('navLinks')?.classList.toggle('active')}
-function closeMobileMenu(){document.getElementById('navLinks')?.classList.remove('active')}
+function toggleMenu(){
+    const nl=document.getElementById('navLinks');
+    if(nl){
+        nl.classList.toggle('active');
+        // Khóa scroll body khi mở menu
+        document.body.classList.toggle('menu-open',nl.classList.contains('active'));
+    }
+}
+function closeMobileMenu(){
+    document.getElementById('navLinks')?.classList.remove('active');
+    document.body.classList.remove('menu-open');
+}
 function scrollToSection(id){const el=document.getElementById(id);if(el){const y=el.getBoundingClientRect().top+window.pageYOffset-80;window.scrollTo({top:y,behavior:'smooth'})}closeMobileMenu()}
 function initGravity(){if(!('IntersectionObserver' in window)){document.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'));return}const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.querySelectorAll('.gravity-item').forEach(i=>i.classList.add('visible'))}),{threshold:0.1});document.querySelectorAll('.gravity-container').forEach(c=>obs.observe(c))}
 function initCountUp(){if(!('IntersectionObserver' in window))return;const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.stat-number').forEach(c=>animateCount(c,parseInt(c.getAttribute('data-count'))));obs.unobserve(e.target)}}),{threshold:0.5});const s=document.querySelector('.hero-stats');if(s)obs.observe(s)}
