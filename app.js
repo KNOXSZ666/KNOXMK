@@ -75,9 +75,24 @@ function initGravity(){if(!('IntersectionObserver' in window)){document.querySel
 function initCountUp(){if(!('IntersectionObserver' in window))return;const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.stat-number').forEach(c=>animateCount(c,parseInt(c.getAttribute('data-count'))));obs.unobserve(e.target)}}),{threshold:0.5});const s=document.querySelector('.hero-stats');if(s)obs.observe(s)}
 function animateCount(el,target){let c=0,s=target/125;const t=setInterval(()=>{c+=s;if(c>=target){c=target;clearInterval(t)}el.textContent=Math.floor(c)},16)}
 function initRatingStars(){document.querySelectorAll('#ratingStars i').forEach(s=>{s.onclick=()=>{currentRating=parseInt(s.getAttribute('data-rating'));document.querySelectorAll('#ratingStars i').forEach(x=>x.classList.toggle('active',parseInt(x.getAttribute('data-rating'))<=currentRating))}})}
-
-async function checkAuth(){const u=getUser();if(u){showUserBar(u.username);if(sb&&!u.isAdmin){await refreshUserInfo();await loadNotificationCount()}}}
-
+async function checkAuth(){
+    const u=getUser();
+    if(u){
+        // Nếu là admin, KHÔNG hiện user panel mà redirect về admin.html
+        if(u.isAdmin){
+            // Chỉ hiện nút "Vào Admin Panel" ở góc
+            const btnLogin=document.getElementById('btnLogin');
+            if(btnLogin){
+                btnLogin.innerHTML='<i class="fas fa-cog"></i> Admin Panel';
+                btnLogin.onclick=()=>window.location.href='admin.html';
+            }
+            return;
+        }
+        // User thường mới hiện panel
+        showUserBar(u.username);
+        if(sb){await refreshUserInfo();await loadNotificationCount()}
+    }
+}
 async function refreshUserInfo(){
     const u=getUser();if(!u||!sb||u.isAdmin)return;
     try{
