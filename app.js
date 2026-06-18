@@ -3,15 +3,15 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'nguyenmm2803';
 
-let sb = null, currentVoucher = null, currentRating = 0, currentReviewService = '', deferredPrompt = null;
+let sb=null,currentVoucher=null,currentRating=0,currentReviewService='',deferredPrompt=null,isPlaying=false;
 
-const PRICES = {
+const PRICES={
     'Mod Skill - 10.000đ':10000,'Mod Cá - 20.000đ':20000,'Mod Level - 10.000đ':10000,'Mod Item - 20.000đ':20000,
     'Mod Pet - 20.000đ':20000,'Mod Kim Cương - 30.000đ/1tr KC':30000,'Câu Cá Vạn Cân Full - Liên hệ':0,
     'Script Sniper Arena - 15.000đ':15000,'Bản Mod Tự Mod - 85.000đ':85000,'Câu Chung Theo Giờ - 20.000đ/giờ':20000
 };
 
-const VIP_TIERS = [
+const VIP_TIERS=[
     {min:0,level:0,name:'NEW',discount:0,icon:'🆕'},
     {min:100000,level:1,name:'VIP 1',discount:5,icon:'🥉'},
     {min:500000,level:2,name:'VIP 2',discount:10,icon:'🥈'},
@@ -40,15 +40,28 @@ window.addEventListener('beforeinstallprompt',e=>{
         setTimeout(()=>document.getElementById('pwaBanner')?.classList.remove('hidden'),3000);
     }
 });
-function installPWA(){
-    if(deferredPrompt){
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(()=>{deferredPrompt=null;dismissPWA()});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;dismissPWA()})}}
+function dismissPWA(){document.getElementById('pwaBanner')?.classList.add('hidden');localStorage.setItem('pwa_dismissed','1')}
+
+// MUSIC PLAYER
+function toggleMusic(){
+    const audio=document.getElementById('bgMusic');
+    const btn=document.getElementById('musicBtn');
+    const player=document.getElementById('musicPlayer');
+    if(!audio)return;
+    if(isPlaying){
+        audio.pause();
+        btn.innerHTML='<i class="fas fa-play"></i>';
+        player.classList.remove('playing');
+        isPlaying=false;
+    }else{
+        audio.volume=0.3;
+        audio.play().then(()=>{
+            btn.innerHTML='<i class="fas fa-pause"></i>';
+            player.classList.add('playing');
+            isPlaying=true;
+        }).catch(e=>console.log('Music blocked:',e));
     }
-}
-function dismissPWA(){
-    document.getElementById('pwaBanner')?.classList.add('hidden');
-    localStorage.setItem('pwa_dismissed','1');
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -69,12 +82,12 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 function initParticles(){
     const c=document.getElementById('particles');if(!c)return;
-    for(let i=0;i<30;i++){
+    for(let i=0;i<10;i++){
         const p=document.createElement('div');
         p.className='particle';
         p.style.left=Math.random()*100+'%';
-        p.style.animationDuration=(Math.random()*6+4)+'s';
-        p.style.animationDelay=Math.random()*8+'s';
+        p.style.animationDuration=(Math.random()*8+8)+'s';
+        p.style.animationDelay=Math.random()*10+'s';
         c.appendChild(p);
     }
 }
@@ -136,45 +149,19 @@ async function refreshUserInfo(){
     }catch(e){console.error(e)}
 }
 setInterval(refreshUserInfo,10000);
-async function login(){
-    const username=document.getElementById('loginUsername').value.trim();
-    const password=document.getElementById('loginPassword').value;
-    if(!username||!password)return toast('Điền đầy đủ!','error');
 
-    // CHECK ADMIN TRƯỚC (quan trọng!)
-    if(username===ADMIN_USERNAME&&password===ADMIN_PASSWORD){
-        setUser({username:'admin',isAdmin:true});
-        toast('✅ Đăng nhập Admin thành công!','success');
-        closeModal('loginModal');
-        setTimeout(()=>window.location.href='admin.html',800);
-        return;
-    }
-    
-    // Nếu nhập sai admin password
-    if(username===ADMIN_USERNAME){
-        return toast('❌ Mật khẩu Admin sai!','error');
-    }
-    
-    if(!sb)return toast('Database chưa kết nối!','error');
-
+async function logLogin(username,success){
+    if(!sb)return;
     try{
-        const{data:user,error}=await sb.from('users').select('*').eq('username',username).eq('password',password).maybeSingle();
-        if(error)return toast('Lỗi: '+error.message,'error');
-        if(!user){
-            await logLogin(username,false);
-            const{data:cu}=await sb.from('users').select('username').eq('username',username).maybeSingle();
-            if(!cu)return toast('❌ Tên không tồn tại!','error');
-            return toast('❌ Mật khẩu sai!','error');
-        }
-        if(user.is_locked)return toast('🔒 Tài khoản đã bị khóa!','error');
-        setUser({username:user.username,isAdmin:false});
-        await logLogin(username,true);
-        toast('✅ Đăng nhập thành công!','success');
-        closeModal('loginModal');
-        showUserBar(user.username);
-        await refreshUserInfo();
-    }catch(e){toast('Lỗi: '+e.message,'error')}
+        const browser=navigator.userAgent.includes('Chrome')?'Chrome':navigator.userAgent.includes('Firefox')?'Firefox':navigator.userAgent.includes('Safari')?'Safari':'Other';
+        const device=/Mobile|Android|iPhone/.test(navigator.userAgent)?'Mobile':'Desktop';
+        const ipResp=await fetch('https://api.ipify.org?format=json').catch(()=>null);
+        const ip=ipResp?(await ipResp.json()).ip:'unknown';
+        await sb.from('login_history').insert([{username,ip,device,browser,success}]);
+        if(success)await sb.from('users').update({last_login:new Date().toISOString(),last_ip:ip,last_device:`${device} - ${browser}`}).eq('username',username);
+    }catch(e){}
 }
+
 async function register(){
     if(!sb)return toast('Database chưa kết nối!','error');
     const username=document.getElementById('regUsername').value.trim();
@@ -215,6 +202,7 @@ async function login(){
         setTimeout(()=>window.location.href='admin.html',800);
         return;
     }
+    if(username===ADMIN_USERNAME)return toast('❌ Mật khẩu Admin sai!','error');
     if(!sb)return toast('Database chưa kết nối!','error');
 
     try{
@@ -252,7 +240,7 @@ function showUserBar(username){
 }
 
 function forgotPassword(){
-    alert('🔑 QUÊN MẬT KHẨU\n\nVui lòng liên hệ Admin qua Zalo/Telegram:\n📱 Zalo: 0564 721 862\n💬 Telegram: @ngonthe666\n\nCung cấp tên đăng nhập + email đã đăng ký để admin reset!');
+    alert('🔑 QUÊN MẬT KHẨU\n\nLiên hệ Admin:\n📱 Zalo: 0564 721 862\n💬 Telegram: @ngonthe666\n\nCung cấp tên đăng nhập + email để admin reset!');
 }
 
 async function loadScripts(){
@@ -352,7 +340,7 @@ async function applyVoucher(){
         else if(v.used_count>=v.max_uses){status.textContent='❌ Mã hết lượt';status.className='error';currentVoucher=null}
         else{currentVoucher=v;status.innerHTML=`✅ Giảm ${v.discount_percent}%`;status.className='success'}
         updateOrderPrice();
-    }catch(e){status.textContent='Lỗi';}
+    }catch(e){status.textContent='Lỗi'}
 }
 
 async function placeOrder(){
@@ -434,7 +422,7 @@ async function submitCard(){
     const amount=parseInt(document.getElementById('cardAmount').value);
     const serial=document.getElementById('cardSerial').value.trim();
     const code=document.getElementById('cardCode').value.trim();
-    if(!serial||!code)return toast('Điền seri và mã thẻ!','error');
+    if(!serial||!code)return toast('Điền seri và mã!','error');
     if(serial.length<10||code.length<10)return toast('Seri/Mã không hợp lệ!','error');
     const cardCode=genCode('CARD');
     try{
@@ -514,7 +502,7 @@ function openReviewOrder(orderCode,service){
 async function loadDashboard(){
     const u=getUser();if(!u||!sb)return;
     const c=document.getElementById('dashboardContent');
-    c.innerHTML='<div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>';
+    c.innerHTML='<div class="skeleton skeleton-card"></div>';
     try{
         const[{data:user},{data:orders}]=await Promise.all([
             sb.from('users').select('*').eq('username',u.username).maybeSingle(),
@@ -525,9 +513,10 @@ async function loadDashboard(){
         const vip=getVipInfo(user?.total_deposited||0);
         const nextVip=VIP_TIERS.find(v=>v.min>(user?.total_deposited||0));
         const remaining=nextVip?nextVip.min-(user?.total_deposited||0):0;
-        c.innerHTML=`<div class="dashboard-stats"><div class="dash-stat"><div class="dash-stat-icon">💰</div><div class="dash-stat-value">${fm(user?.balance||0)}</div><div class="dash-stat-label">Số dư</div></div><div class="dash-stat"><div class="dash-stat-icon">📈</div><div class="dash-stat-value">${fm(user?.total_deposited||0)}</div><div class="dash-stat-label">Tổng nạp</div></div><div class="dash-stat"><div class="dash-stat-icon">🛒</div><div class="dash-stat-value">${fm(user?.total_spent||0)}</div><div class="dash-stat-label">Tổng chi</div></div><div class="dash-stat"><div class="dash-stat-icon">📦</div><div class="dash-stat-value">${totalOrders}</div><div class="dash-stat-label">Đơn hàng</div></div><div class="dash-stat"><div class="dash-stat-icon">✅</div><div class="dash-stat-value">${completed}</div><div class="dash-stat-label">Hoàn thành</div></div><div class="dash-stat"><div class="dash-stat-icon">${vip.icon}</div><div class="dash-stat-value" style="font-size:1.1rem">${vip.name}</div><div class="dash-stat-label">VIP</div></div></div>${nextVip?`<div style="background:rgba(139,92,246,0.1);border:1px solid var(--primary);padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:var(--accent);font-weight:600">🎯 Nạp thêm ${fm(remaining)} để lên ${nextVip.name}</p></div>`:`<div style="background:rgba(245,158,11,0.1);border:1px solid #f59e0b;padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:#f59e0b;font-weight:600">🏆 VIP cao nhất!</p></div>`}<div style="margin-top:15px;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.3);padding:12px;border-radius:var(--radius-sm)"><p style="color:#22c55e"><i class="fas fa-tag"></i> Ưu đãi: <strong>Giảm ${vip.discount}%</strong></p></div>`;
+        c.innerHTML=`<div class="dashboard-stats"><div class="dash-stat"><div class="dash-stat-icon">💰</div><div class="dash-stat-value">${fm(user?.balance||0)}</div><div class="dash-stat-label">Số dư</div></div><div class="dash-stat"><div class="dash-stat-icon">📈</div><div class="dash-stat-value">${fm(user?.total_deposited||0)}</div><div class="dash-stat-label">Tổng nạp</div></div><div class="dash-stat"><div class="dash-stat-icon">🛒</div><div class="dash-stat-value">${fm(user?.total_spent||0)}</div><div class="dash-stat-label">Tổng chi</div></div><div class="dash-stat"><div class="dash-stat-icon">📦</div><div class="dash-stat-value">${totalOrders}</div><div class="dash-stat-label">Đơn hàng</div></div><div class="dash-stat"><div class="dash-stat-icon">✅</div><div class="dash-stat-value">${completed}</div><div class="dash-stat-label">Hoàn thành</div></div><div class="dash-stat"><div class="dash-stat-icon">${vip.icon}</div><div class="dash-stat-value" style="font-size:1.1rem">${vip.name}</div><div class="dash-stat-label">VIP</div></div></div>${nextVip?`<div style="background:rgba(0,240,255,0.1);border:1px solid var(--cyan);padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:var(--cyan);font-weight:600">🎯 Nạp thêm ${fm(remaining)} để lên ${nextVip.name}</p></div>`:`<div style="background:rgba(251,191,36,0.1);border:1px solid #fbbf24;padding:15px;border-radius:var(--radius-sm);margin-top:15px;text-align:center"><p style="color:#fbbf24;font-weight:600">🏆 VIP cao nhất!</p></div>`}<div style="margin-top:15px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.3);padding:12px;border-radius:var(--radius-sm)"><p style="color:#00ff88"><i class="fas fa-tag"></i> Ưu đãi: <strong>Giảm ${vip.discount}%</strong></p></div>`;
     }catch(e){c.innerHTML='<p class="empty-state">Lỗi</p>'}
 }
+
 async function loadNotifications(){
     const u=getUser();if(!u||!sb)return;
     const c=document.getElementById('notificationContent');
@@ -646,8 +635,6 @@ async function submitTicket(){
 function copyReferral(){copyText(document.getElementById('myReferralCode').value)}
 function toggleChat(){document.getElementById('chatBox')?.classList.toggle('hidden')}
 
-    }
-
 function openModal(id){
     const m=document.getElementById(id);
     if(m){
@@ -662,10 +649,7 @@ function openModal(id){
     }
     closeMobileMenu();
 }
-function closeModal(id){
-    const m=document.getElementById(id);
-    if(m){m.classList.remove('active');document.body.style.overflow=''}
-}
+function closeModal(id){const m=document.getElementById(id);if(m){m.classList.remove('active');document.body.style.overflow=''}}
 function switchModal(f,t){closeModal(f);setTimeout(()=>openModal(t),200)}
 document.addEventListener('click',e=>{if(e.target.classList.contains('modal')){e.target.classList.remove('active');document.body.style.overflow=''}});
 
@@ -677,41 +661,4 @@ function toast(msg,type='info'){
 function copyText(text){
     if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>toast('Đã copy: '+text,'success'));
     else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Đã copy: '+text,'success')}
-                                                                           }
-
-    const canvas=document.getElementById('matrixCanvas');
-    if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    let w=canvas.width=window.innerWidth;
-    let h=canvas.height=window.innerHeight;
-    const fontSize=14;
-    let cols=Math.floor(w/fontSize);
-    const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
-    const drops=Array(cols).fill(0);
-    
-    function draw(){
-        ctx.fillStyle='rgba(6,6,15,0.08)';
-        ctx.fillRect(0,0,w,h);
-        ctx.fillStyle='#00f0ff';
-        ctx.font=fontSize+'px monospace';
-        for(let i=0;i<drops.length;i++){
-            const t=chars[Math.floor(Math.random()*chars.length)];
-            ctx.fillText(t,i*fontSize,drops[i]*fontSize);
-            if(drops[i]*fontSize>h&&Math.random()>0.975)drops[i]=0;
-            drops[i]++;
-        }
     }
-    
-    let lastTime=0;
-    function animate(time){
-        if(time-lastTime>80){draw();lastTime=time}
-        requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-    
-    window.addEventListener('resize',()=>{
-        w=canvas.width=window.innerWidth;
-        h=canvas.height=window.innerHeight;
-        cols=Math.floor(w/fontSize);
-    });
-})();
