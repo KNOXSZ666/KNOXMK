@@ -199,14 +199,15 @@ function logout(){
     const bl=document.getElementById('btnLogin');if(bl)bl.style.display='inline-flex';
     toast('Đã đăng xuất!','info');closeMobileMenu();
 }
-
 function showUserBar(username){
+    const u=getUser();
+    if(u&&u.isAdmin)return; // Admin không hiện user panel
+    
     document.getElementById('navUserSection')?.classList.remove('hidden');
     document.getElementById('btnNotifMobile')?.classList.remove('hidden');
     const du=document.getElementById('displayUsername');if(du)du.textContent=username;
     const bl=document.getElementById('btnLogin');if(bl)bl.style.display='none';
 }
-
 function forgotPassword(){alert('🔑 QUÊN MẬT KHẨU\n\nLiên hệ Admin:\n📱 Zalo: 0564 721 862\n💬 Telegram: @ngonthe666')}
 
 async function loadScripts(){
