@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#07070B">
+  <meta name="description" content="KNOX LUXURY - Shop mod game premium: Câu Cá Vạn Cân, Roblox Scripts, nạp tự động 24/7, bảo hành trọn đời.">
+  <title>KNOX LUXURY - Premium Mod Game Shop</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230B0B12'/%3E%3Ctext x='50' y='70' font-size='55' font-family='Arial' font-weight='bold' fill='%2300E5A0' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- Galaxy Background -->
+<div class="galaxy-bg">
+  <div class="galaxy-orb o1"></div>
+  <div class="galaxy-orb o2"></div>
+  <div class="galaxy-orb o3"></div>
+</div>
+<div class="stars" id="starsContainer"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#home" class="nav-logo" onclick="navTo('home');return false;">
+      <span class="logo-icon">K</span>
+      <span class="holo">KNOX Luxury</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#home" data-i18n="nav_home" onclick="navTo('home');return false;">Trang chủ</a></li>
+      <li><a href="#products" data-i18n="nav_products" onclick="navTo('products');return false;">Sản phẩm</a></li>
+      <li><a href="#deposit" data-i18n="nav_deposit" onclick="navTo('deposit');return false;">Nạp tiền</a></li>
+      <li><a href="#history" data-i18n="nav_history" onclick="navTo('history');return false;">Lịch sử</a></li>
+      <li><a href="#dashboard" data-i18n="nav_dashboard" onclick="navTo('dashboard');return false;">Dashboard</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="nav-balance hidden" id="navBalance">
+        <span>💰</span>
+        <span id="navBalanceVal">0đ</span>
+      </div>
+      <span class="vip-badge hidden" id="navVipBadge" style="font-size:0.7rem;">NEW</span>
+      <button class="notif-bell hidden" id="notifBell" onclick="toggleNotifDropdown(event)">
+        🔔<span class="notif-badge hidden" id="notifBadge">0</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown"></div>
+      <button class="btn btn-secondary btn-sm" data-i18n="nav_lang" onclick="toggleLang()">EN</button>
+      <button class="btn btn-primary btn-sm hidden" id="navLoginBtn" data-i18n="nav_login" onclick="openModal('loginModal')">Đăng nhập</button>
+      <button class="btn btn-secondary btn-sm hidden" id="navRegisterBtn" data-i18n="nav_register" onclick="openModal('registerModal')">Đăng ký</button>
+      <button class="btn btn-danger btn-sm hidden" id="navLogoutBtn" data-i18n="nav_logout" onclick="doLogout()">Đăng xuất</button>
+      <button class="btn btn-holo btn-sm hidden" id="navAdminBtn" data-i18n="nav_admin" onclick="window.location.href='admin.html'">Admin Panel</button>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="overlay" id="menuOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <div class="user-panel" id="mobileUserPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <strong id="mobileUsername">Guest</strong>
+      <span class="vip-badge" id="mobileVipBadge" style="display:none">NEW</span>
+    </div>
+    <div class="nav-balance" style="display:inline-flex;margin-bottom:12px;">
+      <span>💰</span><span id="mobileBalanceVal">0đ</span>
+    </div>
+    <div id="mobileDepositBtns" style="display:none;flex-direction:column;gap:8px;">
+      <button class="btn btn-primary btn-block btn-sm" data-i18n="nav_topup" onclick="navTo('deposit');closeMobileMenu();">Nạp tiền</button>
+      <button class="btn btn-secondary btn-block btn-sm" data-i18n="changepass_title" onclick="openModal('changepassModal');closeMobileMenu();">Đổi mật khẩu</button>
+      <button class="btn btn-danger btn-block btn-sm" data-i18n="nav_logout" onclick="doLogout();closeMobileMenu();">Đăng xuất</button>
+    </div>
+    <div id="mobileAuthBtns" style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-primary btn-block btn-sm" data-i18n="nav_login" onclick="openModal('loginModal');closeMobileMenu();">Đăng nhập</button>
+      <button class="btn btn-secondary btn-block btn-sm" data-i18n="nav_register" onclick="openModal('registerModal');closeMobileMenu();">Đăng ký</button>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#home" data-i18n="nav_home" onclick="navTo('home');closeMobileMenu();return false;">Trang chủ</a>
+    <a href="#products" data-i18n="nav_products" onclick="navTo('products');closeMobileMenu();return false;">Sản phẩm</a>
+    <a href="#deposit" data-i18n="nav_deposit" onclick="navTo('deposit');closeMobileMenu();return false;">Nạp tiền</a>
+    <a href="#history" data-i18n="nav_history" onclick="navTo('history');closeMobileMenu();return false;">Lịch sử</a>
+    <a href="#dashboard" data-i18n="nav_dashboard" onclick="navTo('dashboard');closeMobileMenu();return false;">Dashboard</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main id="mainContent">
+
+  <!-- HERO -->
+  <section class="hero hero-premium" id="home">
+    <div class="hero-copy">
+      <div class="eyebrow">PREMIUM MOD GAME SHOP • 24/7 AUTO SYSTEM</div>
+      <h1 class="hero-title holo">KNOX LUXURY</h1>
+      <p class="hero-sub" data-i18n="hero_subtitle">Cửa hàng Mod Game Premium #1 Việt Nam</p>
+      <p class="hero-desc" data-i18n="hero_desc">Mod Game Câu Cá Vạn Cân • Script Roblox • Giá tốt • Hỗ trợ nhanh</p>
+      <div class="hero-features">
+        <span class="hero-feature-tag">⚡ Nạp tự động 24/7</span>
+        <span class="hero-feature-tag">🛡️ Bảo hành trọn đời</span>
+        <span class="hero-feature-tag">💎 VIP giảm giá tới 20%</span>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-luxury" onclick="navTo('products')">Mua Mod Ngay</button>
+        <button class="btn btn-secondary" onclick="navTo('hotDealsSection')">Xem Hot Deals</button>
+        <button class="btn btn-ghost" onclick="toggleChat()">Liên hệ Zalo/Telegram</button>
+      </div>
+    </div>
+    <div class="hero-visual" aria-label="KNOX Luxury premium 3D gravity visual">
+      <img src="assets/products/hero-luxury-pass.svg" alt="KNOX Luxury Premium Pass" loading="eager">
+      <div class="floating-chip chip-1">BEST SELLER</div>
+      <div class="floating-chip chip-2">AUTO 24/7</div>
+      <div class="floating-chip chip-3">VIP 5 CẤP</div>
+    </div>
+  </section>
+
+  <!-- TRUST / WHY CHOOSE US -->
+  <section class="section container trust-section" id="trustSection">
+    <div class="trust-grid">
+      <div class="hud-card trust-card"><span class="trust-icon">⚡</span><strong>Nạp tự động</strong><p>Xử lý nhanh, có lịch sử giao dịch rõ ràng.</p></div>
+      <div class="hud-card trust-card"><span class="trust-icon">🛡️</span><strong>Bảo hành trọn đời</strong><p>Hỗ trợ lỗi sau mua qua Zalo/Telegram.</p></div>
+      <div class="hud-card trust-card"><span class="trust-icon">👑</span><strong>VIP giảm giá</strong><p>Tích lũy nạp, nhận ưu đãi lên tới 20%.</p></div>
+      <div class="hud-card trust-card"><span class="trust-icon">💬</span><strong>Support nhanh</strong><p>Giờ hoạt động 8:00 - 22:00, ưu tiên đơn mới.</p></div>
+    </div>
+  </section>
+
+  <!-- HOT DEALS -->
+  <section class="section container" id="hotDealsSection">
+    <div class="section-header">
+      <h2 class="section-title holo">🔥 HOT DEALS</h2>
+      <p class="section-sub" data-i18n="products_subtitle">Chọn dịch vụ phù hợp với bạn</p>
+    </div>
+    <div class="deal-grid" id="hotDealsGrid">
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="section container" id="products">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="products_title">BẢNG GIÁ DỊCH VỤ</h2>
+      <p class="section-sub" data-i18n="products_subtitle">Chọn dịch vụ phù hợp với bạn</p>
+    </div>
+
+    <div class="cat-header" data-i18n="cat_mod">🎮 MOD GAME - CÂU CÁ VẠN CÂN</div>
+    <div class="product-grid" id="modGrid"></div>
+
+    <div class="cat-header" data-i18n="cat_script">💻 SCRIPT ROBLOX</div>
+    <div class="product-grid" id="scriptGrid"></div>
+
+    <div class="cat-header" data-i18n="cat_other">📦 SẢN PHẨM KHÁC</div>
+    <div class="product-grid" id="otherGrid"></div>
+  </section>
+
+  <!-- DEPOSIT -->
+  <section class="section container" id="deposit">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="deposit_title">NẠP TIỀN</h2>
+      <p class="section-sub" data-i18n="deposit_subtitle">Chọn phương thức nạp</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-i18n="deposit_bank" onclick="switchDepositTab('bank', this)">🏦 Ngân hàng</button>
+      <button class="tab-btn" data-i18n="deposit_card" onclick="switchDepositTab('card', this)">📱 Thẻ cào</button>
+    </div>
+
+    <!-- Bank deposit -->
+    <div id="bankDepositTab">
+      <div class="hud-card" style="padding:24px;max-width:520px;margin:0 auto;">
+        <div class="form-group">
+          <label class="form-label" data-i18n="deposit_amount">Số tiền</label>
+          <input type="number" class="form-input" id="depAmount" placeholder="10000" min="10000" step="1000">
+          <div class="quick-amounts">
+            <button class="quick-amount" onclick="setDepAmount(10000, this)">10K</button>
+            <button class="quick-amount" onclick="setDepAmount(20000, this)">20K</button>
+            <button class="quick-amount" onclick="setDepAmount(50000, this)">50K</button>
+            <button class="quick-amount" onclick="setDepAmount(100000, this)">100K</button>
+            <button class="quick-amount" onclick="setDepAmount(200000, this)">200K</button>
+            <button class="quick-amount" onclick="setDepAmount(500000, this)">500K</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="deposit_method">Phương thức</label>
+          <select class="form-select" id="depMethod">
+            <option value="VCB">Vietcombank (0% phí)</option>
+            <option value="GCOIN">GCOIN</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="deposit_note">Ghi chú</label>
+          <input type="text" class="form-input" id="depNote" data-i18n-ph="deposit_note_placeholder" placeholder="Ghi chú cho admin...">
+        </div>
+        <button class="btn btn-primary btn-block" data-i18n="deposit_submit" onclick="createBankDeposit()">Tạo lệnh nạp</button>
+      </div>
+    </div>
+
+    <!-- Card deposit -->
+    <div id="cardDepositTab" style="display:none;">
+      <div class="hud-card" style="padding:24px;max-width:520px;margin:0 auto;">
+        <div class="form-group">
+          <label class="form-label" data-i18n="card_telco">Nhà mạng</label>
+          <select class="form-select" id="cardTelco" onchange="updateCardReceive()">
+            <option value="Viettel">Viettel</option>
+            <option value="Mobi">Mobifone</option>
+            <option value="Vina">Vinaphone</option>
+            <option value="Vietnamobile">Vietnamobile</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="card_amount">Mệnh giá</label>
+          <select class="form-select" id="cardAmount" onchange="updateCardReceive()">
+            <option value="10000">10.000đ</option>
+            <option value="20000">20.000đ</option>
+            <option value="30000">30.000đ</option>
+            <option value="50000">50.000đ</option>
+            <option value="100000">100.000đ</option>
+            <option value="200000">200.000đ</option>
+            <option value="500000">500.000đ</option>
+            <option value="1000000">1.000.000đ</option>
+          </select>
+        </div>
+        <div class="game-info-box">
+          <div class="game-info-row">
+            <span class="game-info-label" data-i18n="card_discount">Chiết khấu</span>
+            <span class="game-info-val text-accent" id="cardDiscountDisplay">13%</span>
+          </div>
+          <div class="game-info-row">
+            <span class="game-info-label" data-i18n="card_receive">Bạn sẽ nhận</span>
+            <span class="game-info-val text-accent" id="cardReceiveDisplay">0đ</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="card_serial">Số serial</label>
+          <input type="text" class="form-input" id="cardSerial" placeholder="100...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="card_code">Mã thẻ</label>
+          <input type="text" class="form-input" id="cardCode" placeholder="Mã thẻ cào">
+        </div>
+        <button class="btn btn-primary btn-block" data-i18n="card_submit" onclick="createCardDeposit()">Gửi thẻ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRANSACTION HISTORY -->
+  <section class="section container" id="history">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="history_title">LỊCH SỬ GIAO DỊCH</h2>
+    </div>
+    <div id="historyLoginPrompt" class="hud-card" style="padding:40px;text-align:center;">
+      <p style="font-size:1.1rem;margin-bottom:16px;">🔒 Vui lòng đăng nhập để xem lịch sử</p>
+      <button class="btn btn-primary" data-i18n="nav_login" onclick="openModal('loginModal')">Đăng nhập</button>
+    </div>
+    <div id="historyContent" style="display:none;">
+      <div class="tabs">
+        <button class="tab-btn active" data-i18n="tab_orders" onclick="switchHistoryTab('orders', this)">Đơn hàng</button>
+        <button class="tab-btn" data-i18n="tab_deposits" onclick="switchHistoryTab('deposits', this)">Nạp tiền</button>
+        <button class="tab-btn" data-i18n="tab_cards" onclick="switchHistoryTab('cards', this)">Thẻ cào</button>
+      </div>
+      <div id="historyOrdersTab"><div class="table-wrap" id="historyOrdersTable"></div></div>
+      <div id="historyDepositsTab" style="display:none;"><div class="table-wrap" id="historyDepositsTable"></div></div>
+      <div id="historyCardsTab" style="display:none;"><div class="table-wrap" id="historyCardsTable"></div></div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="section container" id="dashboard">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="dash_title">DASHBOARD CÁ NHÂN</h2>
+    </div>
+    <div id="dashLoginPrompt" class="hud-card" style="padding:40px;text-align:center;">
+      <p style="font-size:1.1rem;margin-bottom:16px;">🔒 Vui lòng đăng nhập để xem dashboard</p>
+      <button class="btn btn-primary" data-i18n="nav_login" onclick="openModal('loginModal')">Đăng nhập</button>
+    </div>
+    <div id="dashContent" style="display:none;">
+      <div class="stat-grid" id="dashStats"></div>
+      <div class="hud-card" style="padding:20px;margin-top:16px;" id="vipProgressCard"></div>
+      <div class="hud-card" style="padding:20px;margin-top:16px;" id="referralCard"></div>
+    </div>
+  </section>
+
+  <!-- TOP MONTH -->
+  <section class="section container">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="top_title">🏆 TOP NẠP THÁNG</h2>
+    </div>
+    <div class="top-list" id="topMonthList"></div>
+  </section>
+
+  <!-- TICKETS -->
+  <section class="section container" id="ticketsSection">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="ticket_title">YÊU CẦU HỖ TRỢ</h2>
+    </div>
+    <div id="ticketLoginPrompt" class="hud-card" style="padding:40px;text-align:center;">
+      <p style="font-size:1.1rem;margin-bottom:16px;">🔒 Vui lòng đăng nhập để tạo ticket</p>
+      <button class="btn btn-primary" data-i18n="nav_login" onclick="openModal('loginModal')">Đăng nhập</button>
+    </div>
+    <div id="ticketContent" style="display:none;">
+      <button class="btn btn-primary mb-2" data-i18n="ticket_new" onclick="openModal('ticketModal')">Tạo ticket</button>
+      <div id="ticketList"></div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="section container" id="reviewsSection">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="reviews_title">ĐÁNH GIÁ KHÁCH HÀNG</h2>
+    </div>
+    <div id="reviewsList"></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section container">
+    <div class="section-header">
+      <h2 class="section-title holo" data-i18n="contact_title">LIÊN HỆ</h2>
+    </div>
+    <div class="stat-grid">
+      <div class="hud-card stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" style="font-size:1rem;">Zalo</div>
+        <div class="stat-label">0564 721 862</div>
+      </div>
+      <div class="hud-card stat-card">
+        <div class="stat-icon">✈️</div>
+        <div class="stat-value" style="font-size:1rem;">Telegram</div>
+        <div class="stat-label">@ngonthe666</div>
+      </div>
+      <div class="hud-card stat-card">
+        <div class="stat-icon">📧</div>
+        <div class="stat-value" style="font-size:1rem;">Email</div>
+        <div class="stat-label">n799903@gmail.com</div>
+      </div>
+      <div class="hud-card stat-card">
+        <div class="stat-icon">🕐</div>
+        <div class="stat-value" style="font-size:1rem;" data-i18n="contact_hours">Giờ hoạt động</div>
+        <div class="stat-label">8:00 - 22:00</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>KNOX Luxury</h4>
+      <p>Cửa hàng Mod Game premium. Chuyên mod Câu Cá Vạn Cân, Script Roblox, hỗ trợ nhanh và bảo hành rõ ràng.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Liên hệ</h4>
+      <p>Zalo: 0564 721 862</p>
+      <p>Telegram: @ngonthe666</p>
+      <p>Email: n799903@gmail.com</p>
+      <p>Giờ: 8:00 - 22:00</p>
+    </div>
+    <div class="footer-col">
+      <h4>Thanh toán</h4>
+      <p>Vietcombank: 1064291846</p>
+      <p>Chủ TK: NGUYEN TRUNG NGUYEN</p>
+      <p>Thẻ cào: Viettel/Mobi/Vina</p>
+      <p>GCOIN</p>
+    </div>
+  </div>
+  <div class="footer-bottom" data-i18n="footer_text">© 2026 KNOX Luxury. All rights reserved.</div>
+</footer>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="login_title">ĐĂNG NHẬP</h3>
+      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="login_username">Tên đăng nhập</label>
+        <input type="text" class="form-input" id="loginUsername" data-i18n-ph="login_username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="login_password">Mật khẩu</label>
+        <input type="password" class="form-input" id="loginPassword" data-i18n-ph="login_password">
+      </div>
+      <button class="btn btn-primary btn-block" data-i18n="login_submit" onclick="doLogin()">Đăng nhập</button>
+      <div style="text-align:center;margin-top:12px;">
+        <a href="#" style="color:var(--accent-2);font-size:0.85rem;" onclick="closeModal('loginModal');openModal('forgotModal');return false;" data-i18n="forgot_title">Quên mật khẩu?</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="reg_title">ĐĂNG KÝ TÀI KHOẢN</h3>
+      <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_username">Tên đăng nhập</label>
+        <input type="text" class="form-input" id="regUsername">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_email">Email</label>
+        <input type="email" class="form-input" id="regEmail">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_zalo">Zalo</label>
+        <input type="text" class="form-input" id="regZalo">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_password">Mật khẩu</label>
+        <input type="password" class="form-input" id="regPassword">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_confirm">Xác nhận mật khẩu</label>
+        <input type="password" class="form-input" id="regConfirm">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="reg_referral">Mã giới thiệu (tùy chọn)</label>
+        <input type="text" class="form-input" id="regReferral" placeholder="REFxxxxxx">
+      </div>
+      <button class="btn btn-primary btn-block" data-i18n="reg_submit" onclick="doRegister()">Đăng ký</button>
+    </div>
+  </div>
+</div>
+
+<!-- Buy Modal -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="buy_title">Đặt hàng</h3>
+      <button class="modal-close" onclick="closeModal('buyModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="buyModalBody"></div>
+  </div>
+</div>
+
+<!-- Deposit Success Modal -->
+<div class="modal-overlay" id="depositSuccessModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title text-accent" data-i18n="deposit_success_title">YÊU CẦU NẠP ĐÃ TẠO</h3>
+      <button class="modal-close" onclick="closeModal('depositSuccessModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="depositSuccessBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" data-i18n="deposit_back_home" onclick="closeModal('depositSuccessModal');navTo('home');">Về trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="history_review">Đánh giá</h3>
+      <button class="modal-close" onclick="closeModal('reviewModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="reviewOrderId">
+      <p style="margin-bottom:8px;font-size:0.85rem;color:var(--text-dim);" id="reviewServiceName"></p>
+      <div class="form-group">
+        <label class="form-label" data-i18n="history_rate">Chọn số sao</label>
+        <div class="star-rating" id="reviewStars">
+          <span class="star-icon" data-val="1" onclick="setReviewStars(1)">★</span>
+          <span class="star-icon" data-val="2" onclick="setReviewStars(2)">★</span>
+          <span class="star-icon" data-val="3" onclick="setReviewStars(3)">★</span>
+          <span class="star-icon" data-val="4" onclick="setReviewStars(4)">★</span>
+          <span class="star-icon" data-val="5" onclick="setReviewStars(5)">★</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="history_comment">Bình luận</label>
+        <textarea class="form-textarea" id="reviewComment" data-i18n-ph="history_comment"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" data-i18n="history_submit_review" onclick="submitReview()">Gửi đánh giá</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Modal -->
+<div class="modal-overlay" id="ticketModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="ticket_new">Tạo ticket</h3>
+      <button class="modal-close" onclick="closeModal('ticketModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="ticket_subject">Tiêu đề</label>
+        <input type="text" class="form-input" id="ticketSubject">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="ticket_message">Nội dung</label>
+        <textarea class="form-textarea" id="ticketMessage"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" data-i18n="ticket_submit" onclick="createTicket()">Gửi ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-overlay" id="changepassModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="changepass_title">ĐỔI MẬT KHẨU</h3>
+      <button class="modal-close" onclick="closeModal('changepassModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="changepass_old">Mật khẩu cũ</label>
+        <input type="password" class="form-input" id="cpOld">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="changepass_new">Mật khẩu mới</label>
+        <input type="password" class="form-input" id="cpNew">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="changepass_confirm">Xác nhận mật khẩu mới</label>
+        <input type="password" class="form-input" id="cpConfirm">
+      </div>
+      <button class="btn btn-primary btn-block" data-i18n="changepass_submit" onclick="changePassword()">Đổi mật khẩu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" data-i18n="forgot_title">QUÊN MẬT KHẨU</h3>
+      <button class="modal-close" onclick="closeModal('forgotModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p data-i18n="forgot_desc" style="margin-bottom:16px;">Vui lòng liên hệ admin để reset mật khẩu:</p>
+      <div class="flex flex-wrap gap-1">
+        <a href="https://zalo.me/0564721862" target="_blank" class="btn btn-secondary" data-i18n="forgot_zalo">Zalo</a>
+        <a href="https://t.me/ngonthe666" target="_blank" class="btn btn-secondary" data-i18n="forgot_telegram">Telegram</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div class="install-banner" id="installBanner">
+  <span class="install-icon">📲</span>
+  <div class="install-text">
+    <strong data-i18n="install_title">Cài đặt KNOX Luxury</strong>
+    <span data-i18n="install_desc">Trải nghiệm nhanh hơn với app!</span>
+  </div>
+  <div class="install-actions">
+    <button class="btn btn-primary btn-sm" data-i18n="install_btn" onclick="installApp()">Cài đặt</button>
+    <button class="btn btn-secondary btn-sm" data-i18n="install_dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+
+<!-- Music Player -->
+<div class="music-player">
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()">▶</button>
+  <div class="music-waves" id="musicWaves"><span></span><span></span><span></span><span></span></div>
+  <audio id="musicAudio" src="https://cdn.pixabay.com/audio/2024/02/04/audio_ea7059d8c0.mp3" loop preload="none"></audio>
+</div>
+
+<!-- Chat Widget -->
+<div class="chat-widget">
+  <div class="chat-box" id="chatBox">
+    <h4 data-i18n="contact_title">LIÊN HỆ</h4>
+    <div class="chat-btns">
+      <a href="https://zalo.me/0564721862" target="_blank" class="btn btn-primary btn-block btn-sm">💬 Zalo</a>
+      <a href="https://t.me/ngonthe666" target="_blank" class="btn btn-secondary btn-block btn-sm">✈️ Telegram</a>
+    </div>
+  </div>
+  <button class="chat-bubble" onclick="toggleChat()">💬</button>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lang.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

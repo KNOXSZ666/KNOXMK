@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0B0B12">
+  <title>KNOX Shop - Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230B0B12'/%3E%3Ctext x='50' y='70' font-size='55' font-family='Arial' font-weight='bold' fill='%2300E5A0' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+</head>
+<body class="admin-body">
+
+<!-- Galaxy Background -->
+<div class="galaxy-bg">
+  <div class="galaxy-orb o1"></div>
+  <div class="galaxy-orb o2"></div>
+</div>
+<div class="stars" id="starsContainer"></div>
+
+<!-- ADMIN HEADER -->
+<div class="admin-header">
+  <div class="admin-header-inner">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="logo-icon" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0B0B12;font-family:var(--font-head);font-weight:900;font-size:1rem;">K</span>
+      <span class="admin-title holo">KNOX Admin</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-secondary btn-sm" onclick="exportBackup()">💾 Backup DB</button>
+      <button class="btn btn-danger btn-sm" onclick="adminLogout()">Đăng xuất</button>
+      <a href="index.html" class="btn btn-secondary btn-sm">🌐 Site</a>
+    </div>
+  </div>
+</div>
+
+<div class="admin-container">
+  <!-- ADMIN STATS -->
+  <div class="admin-stat-grid" id="adminStats">
+    <div class="hud-card stat-card"><div class="stat-icon">📋</div><div class="stat-value" id="statTotalOrders">0</div><div class="stat-label">Tổng đơn</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">⏳</div><div class="stat-value text-warning" id="statPendingOrders">0</div><div class="stat-label">Đơn chờ</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">✅</div><div class="stat-value text-accent" id="statCompletedOrders">0</div><div class="stat-label">Hoàn thành</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">💰</div><div class="stat-value text-warning" id="statPendingDeposits">0</div><div class="stat-label">Nạp chờ</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">📱</div><div class="stat-value text-warning" id="statPendingCards">0</div><div class="stat-label">Thẻ chờ</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">🎫</div><div class="stat-value text-warning" id="statOpenTickets">0</div><div class="stat-label">Ticket mở</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="statTotalUsers">0</div><div class="stat-label">Tổng user</div></div>
+    <div class="hud-card stat-card"><div class="stat-icon">💎</div><div class="stat-value text-accent" id="statRevenue">0đ</div><div class="stat-label">Doanh thu</div></div>
+  </div>
+
+  <!-- ADMIN TABS -->
+  <div class="admin-tabs" id="adminTabs">
+    <button class="admin-tab-btn active" onclick="switchAdminTab('revenue',this)">📊 Doanh thu</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('orders',this)">🛒 Đơn hàng <span class="badge hidden" id="badgeOrders"></span></button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('deposits',this)">💰 Nạp tiền <span class="badge hidden" id="badgeDeposits"></span></button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('cards',this)">📱 Thẻ cào <span class="badge hidden" id="badgeCards"></span></button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('tickets',this)">🎫 Tickets <span class="badge hidden" id="badgeTickets"></span></button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('users',this)">👥 Users</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('scripts',this)">📜 Scripts</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('deals',this)">🔥 Hot Deals</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('vouchers',this)">🎟️ Vouchers</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('reviews',this)">⭐ Reviews</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('broadcast',this)">📢 Broadcast</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('logins',this)">🔑 Login History</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('logs',this)">📋 Admin Logs</button>
+  </div>
+
+  <!-- REVENUE CHART -->
+  <div class="admin-tab-panel active" id="panel-revenue">
+    <div class="admin-toolbar">
+      <button class="btn btn-primary btn-sm" onclick="loadRevenueChart(7, this)">7 ngày</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadRevenueChart(30, this)">30 ngày</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadRevenueChart(365, this)">12 tháng</button>
+    </div>
+    <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="admin-tab-panel" id="panel-orders">
+    <div class="admin-toolbar">
+      <input type="text" class="form-input" id="orderSearch" placeholder="Tìm mã/KH/dịch vụ..." oninput="renderOrdersTable()">
+      <select class="form-select" id="orderFilter" onchange="renderOrdersTable()">
+        <option value="">Tất cả trạng thái</option>
+        <option value="pending">Chờ xử lý</option>
+        <option value="processing">Đang xử lý</option>
+        <option value="completed">Hoàn thành</option>
+        <option value="cancelled">Đã hủy</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="exportExcel('orders')">📥 Xuất Excel</button>
+    </div>
+    <div class="table-wrap" id="ordersTable"></div>
+  </div>
+
+  <!-- DEPOSITS -->
+  <div class="admin-tab-panel" id="panel-deposits">
+    <div class="admin-toolbar">
+      <select class="form-select" id="depositFilter" onchange="depositFilter=this.value;loadDeposits()">
+        <option value="all">Tất cả trạng thái</option>
+        <option value="pending">🔴 Chờ duyệt</option>
+        <option value="completed">🟢 Đã duyệt</option>
+        <option value="rejected">⚫ Từ chối</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="loadDeposits()">🔄 Làm mới</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportExcel('deposits')">📥 Xuất Excel</button>
+    </div>
+    <div class="table-wrap" id="depositsTable"></div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="admin-tab-panel" id="panel-cards">
+    <div class="admin-toolbar">
+      <select class="form-select" id="cardFilter" onchange="cardFilter=this.value;loadCards()">
+        <option value="all">Tất cả trạng thái</option>
+        <option value="pending">🔴 Chờ check</option>
+        <option value="completed">🟢 Đã duyệt</option>
+        <option value="rejected">⚫ Từ chối</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="loadCards()">🔄 Làm mới</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportExcel('cards')">📥 Xuất Excel</button>
+    </div>
+    <div class="table-wrap" id="cardsTable"></div>
+  </div>
+
+  <!-- TICKETS -->
+  <div class="admin-tab-panel" id="panel-tickets">
+    <div class="table-wrap" id="ticketsTable"></div>
+  </div>
+
+  <!-- USERS -->
+  <div class="admin-tab-panel" id="panel-users">
+    <div class="admin-toolbar">
+      <input type="text" class="form-input" id="userSearch" placeholder="Tìm user..." oninput="renderUsersTable()">
+      <button class="btn btn-secondary btn-sm" onclick="exportExcel('users')">📥 Xuất Excel</button>
+    </div>
+    <div class="table-wrap" id="usersTable"></div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <div class="admin-tab-panel" id="panel-scripts">
+    <div class="hud-card" style="padding:20px;margin-bottom:16px;">
+      <h4 style="margin-bottom:12px;">Thêm Script</h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" class="form-input" id="scriptName" placeholder="Tên script" style="flex:1;min-width:150px;">
+        <input type="text" class="form-input" id="scriptGame" placeholder="Game" style="flex:1;min-width:120px;">
+        <input type="number" class="form-input" id="scriptPrice" placeholder="Giá" style="width:120px;">
+        <button class="btn btn-primary" onclick="addScript()">Thêm</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="scriptsTable"></div>
+  </div>
+
+  <!-- HOT DEALS -->
+  <div class="admin-tab-panel" id="panel-deals">
+    <div class="hud-card" style="padding:20px;margin-bottom:16px;">
+      <h4 style="margin-bottom:12px;">Tạo Hot Deal</h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" class="form-input" id="dealName" placeholder="Tên sản phẩm" style="flex:1;min-width:150px;">
+        <input type="number" class="form-input" id="dealOriginal" placeholder="Giá gốc" style="width:120px;">
+        <input type="number" class="form-input" id="dealDiscount" placeholder="% giảm" style="width:100px;">
+        <input type="text" class="form-input" id="dealDesc" placeholder="Mô tả" style="flex:1;min-width:150px;">
+        <button class="btn btn-primary" onclick="addDeal()">Tạo</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="dealsTable"></div>
+  </div>
+
+  <!-- VOUCHERS -->
+  <div class="admin-tab-panel" id="panel-vouchers">
+    <div class="hud-card" style="padding:20px;margin-bottom:16px;">
+      <h4 style="margin-bottom:12px;">Tạo Voucher</h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" class="form-input" id="voucherCode" placeholder="Mã (UPPERCASE)" style="flex:1;min-width:120px;">
+        <input type="number" class="form-input" id="voucherPercent" placeholder="% giảm" style="width:100px;">
+        <input type="number" class="form-input" id="voucherMax" placeholder="Số lượt" style="width:100px;">
+        <button class="btn btn-primary" onclick="addVoucher()">Tạo</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="vouchersTable"></div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="admin-tab-panel" id="panel-reviews">
+    <div class="table-wrap" id="reviewsTable"></div>
+  </div>
+
+  <!-- BROADCAST -->
+  <div class="admin-tab-panel" id="panel-broadcast">
+    <div class="hud-card" style="padding:20px;max-width:500px;">
+      <h4 style="margin-bottom:12px;">Gửi thông báo toàn hệ thống</h4>
+      <div class="form-group">
+        <label class="form-label">Tiêu đề</label>
+        <input type="text" class="form-input" id="broadcastTitle">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nội dung</label>
+        <textarea class="form-textarea" id="broadcastMessage"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="sendBroadcast()">📢 Gửi cho tất cả</button>
+    </div>
+    <h4 style="margin:20px 0 10px;">Lịch sử Broadcast</h4>
+    <div id="broadcastHistory"></div>
+  </div>
+
+  <!-- LOGIN HISTORY -->
+  <div class="admin-tab-panel" id="panel-logins">
+    <div class="table-wrap" id="loginsTable"></div>
+  </div>
+
+  <!-- ADMIN LOGS -->
+  <div class="admin-tab-panel" id="panel-logs">
+    <div class="table-wrap" id="logsTable"></div>
+  </div>
+
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="lang.js"></script>
+<script src="admin.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
